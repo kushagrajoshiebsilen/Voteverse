@@ -5,8 +5,7 @@ import type { DialogueChoice, GameEffect, ZoneId, MiniGameId } from './game/type
 import type { Notification } from './components/GameNotification';
 import { GameCanvas } from './components/GameCanvas';
 import { DialogueBox } from './components/DialogueBox';
-import { GuardianHUD } from './components/GuardianHUD';
-import { ChampionHUD } from './components/ChampionHUD';
+import { DashboardHUD } from './components/DashboardHUD';
 import { RoleIntro } from './components/RoleIntro';
 import { MiniGame } from './components/MiniGame';
 import { IntroScreen } from './components/IntroScreen';
@@ -450,31 +449,16 @@ function App() {
       {/* ── MAIN GAME WORLD ──────────────────────────── */}
       {(state.phase === 'playing' || state.phase === 'dialogue' || state.phase === 'miniGame') && (
         <>
-          <GameCanvas
-            state={state}
-            zone={currentZone}
-            onInteract={handleInteract}
-            onPlayerMove={handlePlayerMove}
-            inputRef={inputRef}
-            touchRef={touchRef as React.MutableRefObject<{ dx: number; dy: number }>}
-          />
-
-          {/* Role-specific HUD */}
-          {state.role === 'guardian' ? (
-            <GuardianHUD
+          <DashboardHUD state={state} onZoneTravel={handleZoneTravel}>
+            <GameCanvas
               state={state}
-              onZoneTravel={handleZoneTravel}
-              apiKey={apiKey}
-              onSetApiKey={setApiKey}
+              zone={currentZone}
+              onInteract={handleInteract}
+              onPlayerMove={handlePlayerMove}
+              inputRef={inputRef}
+              touchRef={touchRef as React.MutableRefObject<{ dx: number; dy: number }>}
             />
-          ) : (
-            <ChampionHUD
-              state={state}
-              onZoneTravel={handleZoneTravel}
-              apiKey={apiKey}
-              onSetApiKey={setApiKey}
-            />
-          )}
+          </DashboardHUD>
 
           {/* Role intro cinematic — shown once after first load */}
           {!roleIntroShown && (
