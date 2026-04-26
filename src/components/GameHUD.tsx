@@ -91,6 +91,48 @@ function Divider({ label }: { label: string }) {
   );
 }
 
+// ── Minimap ──────────────────────────────────────────────────
+function Minimap({ state, zone }: { state: GameState; zone: any }) {
+  const mapW = 180; const mapH = 120;
+  const scale = 0.12;
+
+  return (
+    <div style={{
+      position: 'absolute', top: 80, right: 24, zIndex: 20,
+      width: mapW, height: mapH, ...glass(CYAN),
+      borderRadius: '8px', overflow: 'hidden', padding: 0
+    }}>
+      <div style={{ position: 'absolute', inset: 0, opacity: 0.1, backgroundImage: `repeating-linear-gradient(45deg, ${CYAN}, ${CYAN} 1px, transparent 1px, transparent 10px)` }} />
+      <div style={{ position: 'relative', width: '100%', height: '100%' }}>
+         {/* Player Dot */}
+         <div style={{
+           position: 'absolute',
+           left: mapW/2 + (state.player.pos.x - state.player.pos.y) * 0.866 * scale - 4,
+           top: mapH/2 + (state.player.pos.x + state.player.pos.y) * 0.5 * scale - 4,
+           width: 8, height: 8, borderRadius: '50%', background: '#00E5FF',
+           boxShadow: '0 0 8px #00E5FF', animation: 'pulse-soft 1.5s infinite', zIndex: 5
+         }} />
+         
+         {/* NPC Blips */}
+         {zone.npcs.map((n: any) => (
+           <div key={n.id} style={{
+             position: 'absolute',
+             left: mapW/2 + (n.pos.x - n.pos.y) * 0.866 * scale - 3,
+             top: mapH/2 + (n.pos.x + n.pos.y) * 0.5 * scale - 3,
+             width: 6, height: 6, borderRadius: '50%', background: '#FFB800',
+             boxShadow: '0 0 6px #FFB800', opacity: 0.8
+           }} />
+         ))}
+
+         {/* Sector Label */}
+         <div style={{ position: 'absolute', bottom: 4, right: 6, fontFamily: 'Rajdhani', fontSize: 9, fontWeight: 800, color: CYAN, letterSpacing: '0.1em', opacity: 0.8 }}>
+            RADAR_ACTIVE
+         </div>
+      </div>
+    </div>
+  );
+}
+
 // ── Main HUD ─────────────────────────────────────────────────
 export const GameHUD: React.FC<Props> = ({ state, onZoneTravel, apiKey, onSetApiKey }) => {
   const [activePanel, setActivePanel] = useState<'map' | 'quests' | 'inventory' | 'ai' | null>(null);
@@ -144,52 +186,84 @@ export const GameHUD: React.FC<Props> = ({ state, onZoneTravel, apiKey, onSetApi
         </div>
       </div>
 
+      {/* ══ RADAR ═══════════════════════════════════════ */}
+      <Minimap state={state} zone={zone} />
+
       {/* ══ QUEST TRACKER (left) ═════════════════════════ */}
       {activeQuest && (
         <div style={{
           position: 'absolute', left: 0, top: 80, zIndex: 20,
-          width: 260, padding: '16px 20px',
-          background: 'rgba(8,10,17,0.9)',
-          backdropFilter: 'blur(20px)',
-          borderTop: `1px solid ${GOLD}40`,
-          borderRight: `1px solid ${GOLD}40`,
-          borderBottom: `1px solid ${GOLD}40`,
-          borderLeft: `3px solid ${GOLD}`,
-          borderRadius: '0 8px 8px 0',
-          animation: 'slide-left 0.4s cubic-bezier(0.16,1,0.3,1) both',
+          width: 280, padding: '20px 24px',
+          background: 'rgba(8, 12, 20, 0.96)',
+          backdropFilter: 'blur(32px)',
+          borderTop: `1px solid ${GOLD}50`,
+          borderRight: `2px solid ${GOLD}`,
+          borderBottom: `1px solid ${GOLD}50`,
+          borderRadius: '0 16px 16px 0',
+          boxShadow: `0 16px 48px rgba(0,0,0,0.8), 0 0 20px ${GOLD}15`,
+          animation: 'slide-left 0.4s var(--ease-out) both',
         }}>
-          <div style={{ ...row, gap: 8, marginBottom: 12 }}>
-            <div style={{ width: 8, height: 8, borderRadius: '50%', background: GOLD, boxShadow: `0 0 8px ${GOLD}`, animation: 'pulse-soft 2s infinite' }} />
-            <span style={{ fontFamily: 'Orbitron, sans-serif', fontSize: 10, fontWeight: 700, color: GOLD, letterSpacing: '0.25em' }}>ACTIVE DIRECTIVE</span>
+          <div style={{ ...row, gap: 10, marginBottom: 16 }}>
+            <div style={{ width: 10, height: 10, borderRadius: '50%', background: GOLD, boxShadow: `0 0 12px ${GOLD}`, animation: 'pulse-soft 2s infinite' }} />
+            <span style={{ fontFamily: 'Orbitron, sans-serif', fontSize: 11, fontWeight: 900, color: GOLD, letterSpacing: '0.3em' }}>ACTIVE DIRECTIVE</span>
           </div>
-          <div style={{ fontFamily: 'Orbitron, sans-serif', fontSize: 13, fontWeight: 700, color: '#F0F4F8', marginBottom: 14, lineHeight: 1.4, textTransform: 'uppercase' }}>
+          
+          <div style={{ fontFamily: 'Orbitron, sans-serif', fontSize: 14, fontWeight: 900, color: '#FFF', marginBottom: 18, lineHeight: 1.4, letterSpacing: '0.02em' }}>
             {activeQuest.title}
           </div>
+
           <div style={col}>
-            {activeQuest.objectives.map(obj => (
-              <div key={obj.id} style={{ ...row, gap: 10, marginBottom: 8 }}>
-                <div style={{
-                  width: 16, height: 16, borderRadius: 4, flexShrink: 0,
-                  background: obj.complete ? `${GREEN}22` : 'rgba(255,255,255,0.04)',
-                  border: `1px solid ${obj.complete ? GREEN : 'rgba(255,255,255,0.1)'}`,
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  fontSize: 10, color: GREEN,
-                  boxShadow: obj.complete ? `0 0 8px ${GREEN}50` : 'none',
-                  transition: 'all 0.3s ease',
-                }}>
-                  {obj.complete ? '✓' : ''}
+            {activeQuest.objectives.map(obj => {
+              const isMissingItem = obj.text.includes('Aadhaar') && !state.inventory.includes('aadhaar_card');
+              return (
+                <div key={obj.id} style={{ marginBottom: 12 }}>
+                  <div style={{ ...row, gap: 12 }}>
+                    <div style={{
+                      width: 18, height: 18, borderRadius: 5, flexShrink: 0,
+                      background: obj.complete ? `${GREEN}25` : 'rgba(255,255,255,0.05)',
+                      border: `1px solid ${obj.complete ? GREEN : 'rgba(255,255,255,0.15)'}`,
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      fontSize: 11, color: GREEN,
+                      boxShadow: obj.complete ? `0 0 10px ${GREEN}40` : 'none',
+                    }}>
+                      {obj.complete ? '✓' : ''}
+                    </div>
+                    <span style={{ 
+                      fontFamily: 'Inter, sans-serif', fontSize: 12, fontWeight: 500,
+                      color: obj.complete ? '#5A6B8A' : '#F0F4F8', 
+                      textDecoration: obj.complete ? 'line-through' : 'none', 
+                      lineHeight: 1.5, opacity: obj.complete ? 0.6 : 1
+                    }}>
+                      {obj.text}
+                    </span>
+                  </div>
+                  
+                  {/* Item Requirement Sub-Hint */}
+                  {obj.id === 'find_docs' && !obj.complete && (
+                    <div style={{ 
+                      marginLeft: 30, marginTop: 4, padding: '4px 10px', borderRadius: 4, 
+                      background: isMissingItem ? 'rgba(255, 51, 102, 0.1)' : 'rgba(0, 229, 255, 0.1)',
+                      borderLeft: `2px solid ${isMissingItem ? DANGER : CYAN}`,
+                      display: 'flex', alignItems: 'center', gap: 6
+                    }}>
+                      <span style={{ fontSize: 10 }}>{isMissingItem ? '❌' : '📦'}</span>
+                      <span style={{ fontFamily: 'Rajdhani', fontSize: 10, fontWeight: 700, color: isMissingItem ? DANGER : CYAN, letterSpacing: '0.05em' }}>
+                        {isMissingItem ? 'MISSING: AADHAAR CARD' : 'ASSET SECURED'}
+                      </span>
+                    </div>
+                  )}
                 </div>
-                <span style={{ fontFamily: 'Inter, sans-serif', fontSize: 12, color: obj.complete ? '#5A6B8A' : '#A0ABC0', textDecoration: obj.complete ? 'line-through' : 'none', lineHeight: 1.4 }}>
-                  {obj.text}
-                </span>
-              </div>
-            ))}
+              );
+            })}
           </div>
-          {activeQuest.reward && (
-            <div style={{ marginTop: 12, paddingTop: 10, borderTop: `1px dashed ${CYAN}30` }}>
-              <span style={{ fontFamily: 'Rajdhani, sans-serif', fontSize: 11, color: CYAN, letterSpacing: '0.1em', fontWeight: 700 }}>YIELD › {activeQuest.reward}</span>
-            </div>
-          )}
+
+          <div style={{ 
+            marginTop: 18, paddingTop: 14, borderTop: '1px solid rgba(255,255,255,0.08)',
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between'
+          }}>
+            <span style={{ fontFamily: 'Rajdhani, sans-serif', fontSize: 11, color: '#5A6B8A', fontWeight: 700, letterSpacing: '0.1em' }}>MISSION REWARD</span>
+            <span style={{ fontFamily: 'Orbitron, sans-serif', fontSize: 11, color: GOLD, fontWeight: 900 }}>{activeQuest.reward}</span>
+          </div>
         </div>
       )}
 

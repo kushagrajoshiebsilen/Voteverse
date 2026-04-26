@@ -144,20 +144,31 @@ function App() {
         });
       }
 
-      if (effect.triggerEvent === 'go_registration') {
+      if (effect.triggerEvent === 'go_registration' || effect.unlockZone === 'registration') {
         setPendingTransition('registration');
         dispatch({ type: 'SET_PHASE', payload: 'transition' });
-      } else if (effect.triggerEvent === 'go_campaign') {
+      } else if (effect.triggerEvent === 'go_campaign' || effect.unlockZone === 'campaign') {
         setPendingTransition('campaign');
         dispatch({ type: 'SET_PHASE', payload: 'transition' });
-      } else if (effect.triggerEvent === 'go_polling') {
+      } else if (effect.triggerEvent === 'go_polling' || effect.unlockZone === 'polling') {
         setPendingTransition('polling');
         dispatch({ type: 'SET_PHASE', payload: 'transition' });
-      } else if (effect.triggerEvent === 'go_results') {
+      } else if (effect.triggerEvent === 'go_results' || effect.unlockZone === 'results') {
         setPendingTransition('results');
         dispatch({ type: 'SET_PHASE', payload: 'transition' });
       } else if (effect.triggerEvent === 'trigger_ending') {
         dispatch({ type: 'SET_ENDING', payload: 'main' });
+      } else if (effect.triggerEvent === 'search_shelf') {
+        // Fail-safe: Guarantee item if on quest
+        if (!state.inventory.includes('aadhaar_card')) {
+          dispatch({ type: 'ADD_ITEM', payload: 'aadhaar_card' });
+          addNotification({
+            type: 'achievement',
+            title: 'ASSET RECOVERED',
+            message: 'Aadhaar Card found! Proceed to Registration.',
+            emoji: '🪪',
+          });
+        }
       } else if (effect.triggerEvent === 'read_notice') {
         addNotification({
           type: 'democracy',
@@ -284,8 +295,8 @@ function App() {
 
   // ── Player movement ──────────────────────────────
   const handlePlayerMove = useCallback(
-    (pos: { x: number; y: number }) => {
-      dispatch({ type: 'MOVE_PLAYER', payload: pos });
+    (pos: { x: number; y: number }, z: number) => {
+      dispatch({ type: 'MOVE_PLAYER', payload: { pos, z } });
     },
     []
   );
@@ -304,8 +315,23 @@ function App() {
   // ── Mini-game complete ───────────────────────────
   const handleMiniGameComplete = useCallback(
     (success: boolean, score: number) => {
+      const activeGame = state.activeMiniGameId;
       dispatch({ type: 'END_MINI_GAME', payload: { success, scoreBonus: score } });
+      
       if (success) {
+        // Reward mapping
+        if (activeGame === 'document_hunt') {
+          dispatch({ type: 'ADD_ITEM', payload: 'aadhaar_card' });
+          addNotification({
+            type: 'achievement',
+            title: 'DOCUMENT RECOVERED!',
+            message: 'Aadhaar Card added to inventory. You can now register!',
+            emoji: '🪪',
+          });
+        } else if (activeGame === 'form_sorting') {
+          dispatch({ type: 'ADD_ITEM', payload: 'form6' });
+        }
+
         addNotification({
           type: 'achievement',
           title: 'CHALLENGE COMPLETE!',
@@ -314,7 +340,7 @@ function App() {
         });
       }
     },
-    [addNotification]
+    [state.activeMiniGameId, dispatch, addNotification]
   );
 
   // ── Zone transition complete ─────────────────────
@@ -402,12 +428,20 @@ function App() {
 
   return (
     <div
+      className="relative w-full h-full bg-[#030508] overflow-hidden select-none scanlines"
       style={{
         position: 'relative', width: '100vw', height: '100vh',
         overflow: 'hidden', background: '#030508',
         fontFamily: "'Inter', system-ui, sans-serif",
       }}
     >
+      {/* ── CINEMATIC OVERLAYS ────────────────────────── */}
+        <div className="vignette" />
+        <div className="hud-corner corner-tl" />
+        <div className="hud-corner corner-tr" />
+        <div className="hud-corner corner-bl" />
+        <div className="hud-corner corner-br" />
+
       {/* ── INTRO SCREEN ─────────────────────────────── */}
       {state.phase === 'intro' || state.phase === 'naming' ? (
         <IntroScreen onStart={handleGameStart} />

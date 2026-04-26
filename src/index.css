@@ -23,10 +23,8 @@
     --success:       #00FF88;
     --warning:       #FFB800;
     --danger:        #FF3366;
-    --panel-bg:      rgba(8,10,17,0.88);
-    --panel-border:  rgba(0,229,255,0.25);
-    --panel-shadow:  0 8px 40px rgba(0,0,0,0.85), 0 0 0 1px rgba(0,229,255,0.1) inset;
-    --r-sm: 4px; --r-md: 8px; --r-lg: 12px;
+    --panel-shadow:  0 12px 60px rgba(0,0,0,0.9), 0 0 0 1px rgba(0,229,255,0.15) inset;
+    --r-sm: 4px; --r-md: 10px; --r-lg: 16px;
     --ease-out: cubic-bezier(0.16,1,0.3,1);
     /* Legacy */
     --teal: #00E5FF; --teal-light: #4AF0FF;
@@ -57,6 +55,23 @@
 }
 @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-6px)} }
 @keyframes scan  { from{transform:translateY(-100%)} to{transform:translateY(100%)} }
+@keyframes neon-pulse { 0%,100%{border-color: rgba(0,229,255,0.3); box-shadow: 0 0 5px rgba(0,229,255,0.1);} 50%{border-color: rgba(0,229,255,1); box-shadow: 0 0 20px rgba(0,229,255,0.3);} }
+
+/* ── SCANLINE OVERLAY & CHROMATIC ABERRATION ── */
+.scanlines::after {
+  content: " ";
+  display: block;
+  position: absolute;
+  top: 0; left: 0; bottom: 0; right: 0;
+  background: 
+    linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%), 
+    linear-gradient(90deg, rgba(255, 0, 0, 0.04), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.04));
+  z-index: 100;
+  background-size: 100% 3px, 3px 100%;
+  pointer-events: none;
+  opacity: 0.4;
+  filter: blur(0.5px);
+}
 
 /* ── ANIMATION CLASSES ── */
 .anim-fade-up    { animation: fade-up    0.5s var(--ease-out) both; }
@@ -68,11 +83,20 @@
 
 /* ── PANEL / GLASS ── */
 .panel {
-  background: var(--panel-bg) !important;
-  backdrop-filter: blur(28px) saturate(160%) !important;
-  -webkit-backdrop-filter: blur(28px) saturate(160%) !important;
-  border: 1px solid var(--panel-border) !important;
+  background: linear-gradient(135deg, rgba(8,12,20,0.96) 0%, rgba(15,21,35,0.92) 100%) !important;
+  backdrop-filter: blur(40px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(40px) saturate(180%) !important;
+  border: 1px solid rgba(0,229,255,0.2) !important;
   box-shadow: var(--panel-shadow) !important;
+  position: relative;
+  overflow: hidden;
+}
+
+.panel::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--cyan), transparent);
+  opacity: 0.4;
 }
 
 /* ── METER BAR ── */
@@ -151,11 +175,12 @@
   transition: all .2s var(--ease-out);
 }
 .choice-btn:hover:not(:disabled) {
-  background: rgba(0,229,255,.08);
-  border-color: rgba(0,229,255,.5);
-  border-left-color: var(--cyan);
+  background: rgba(0,229,255,0.12);
+  border-color: var(--cyan);
+  border-left-width: 6px;
   color: var(--text-primary);
-  box-shadow: 0 4px 16px rgba(0,229,255,.12);
+  box-shadow: 0 8px 32px rgba(0,229,255,0.25);
+  transform: translateX(8px);
 }
 .choice-btn:disabled { opacity:.35; cursor:not-allowed; }
 
@@ -203,4 +228,43 @@
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
+}
+
+/* ── CINEMATIC CORNERS ── */
+.hud-corner {
+  position: absolute;
+  width: 40px; height: 40px;
+  border: 2px solid var(--cyan);
+  pointer-events: none;
+  opacity: 0.3;
+  z-index: 50;
+}
+.corner-tl { top: 20px; left: 20px; border-right: 0; border-bottom: 0; }
+.corner-tr { top: 20px; right: 20px; border-left: 0; border-bottom: 0; }
+.corner-bl { bottom: 20px; left: 20px; border-right: 0; border-top: 0; }
+.corner-br { bottom: 20px; right: 20px; border-left: 0; border-top: 0; }
+
+.vignette {
+  position: absolute; inset: 0;
+  background: radial-gradient(circle, transparent 40%, rgba(3,5,8,0.7) 100%);
+  pointer-events: none;
+  z-index: 5;
+}
+
+/* ── NEURAL CURSOR ── */
+.scanlines, .vignette, .panel, .choice-btn {
+  cursor: url("data:image/svg+xml,%3Csvg width='24' height='24' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='12' cy='12' r='8' stroke='%2300E5FF' stroke-width='1.5'/%3E%3Ccircle cx='12' cy='12' r='2' fill='white'/%3E%3Cpath d='M12 2V6M12 18V22M2 12H6M18 12H22' stroke='%2300E5FF' stroke-width='1.5'/%3E%3C/svg%3E") 12 12, auto !important;
+}
+
+#custom-cursor { display: none; }
+
+/* ── NEURAL GLITCH ── */
+@keyframes neural-glitch {
+  0% { transform: translate(0); opacity: 1; filter: hue-rotate(0deg); }
+  10% { transform: translate(-2px, 2px); filter: hue-rotate(90deg); }
+  20% { transform: translate(2px, -2px); opacity: 0.8; }
+  30% { transform: translate(0); opacity: 1; filter: hue-rotate(0deg); }
+}
+.glitch-active {
+  animation: neural-glitch 0.2s var(--ease-out) both;
 }

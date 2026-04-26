@@ -107,26 +107,29 @@ export const DialogueBox: React.FC<Props> = ({ state, onChoice, onClose, geminiT
 
           {/* Name tab */}
           <div style={{
-            flex: 1, height: 48, padding: '0 20px',
-            background: `linear-gradient(90deg, ${accent}18 0%, rgba(8,10,17,0.97) 70%)`,
+            flex: 1, height: 52, padding: '0 24px',
+            background: `linear-gradient(90deg, ${accent}22 0%, rgba(8,12,20,0.98) 80%)`,
             border: `1px solid ${accent}`,
             borderBottom: 'none', borderLeft: 'none',
-            borderRadius: '0 8px 0 0',
+            borderRadius: '0 12px 0 0',
             display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+            boxShadow: `inset 0 1px 0 rgba(255,255,255,0.05)`,
           }}>
             <div style={col}>
               <span style={{
-                fontFamily: 'Orbitron, sans-serif', fontSize: 15, fontWeight: 700,
-                color: glitch ? '#fff' : '#F0F4F8', letterSpacing: '0.08em', textTransform: 'uppercase', lineHeight: 1,
-                textShadow: glitch ? `3px 0 #FF3366, -3px 0 ${accent}` : 'none',
+                fontFamily: 'Orbitron, sans-serif', fontSize: 16, fontWeight: 900,
+                color: glitch ? '#fff' : '#FFF', letterSpacing: '0.12em', textTransform: 'uppercase', lineHeight: 1,
+                textShadow: glitch ? `3px 0 #FF3366, -3px 0 ${accent}` : `0 0 10px ${accent}40`,
                 transition: 'color 0.05s, text-shadow 0.05s',
               }}>{npc.name}</span>
-              <span style={{ fontFamily: 'Rajdhani, sans-serif', fontSize: 11, fontWeight: 700, color: accent, letterSpacing: '0.2em', marginTop: 3, textTransform: 'uppercase', opacity: 0.9 }}>{npc.role}</span>
+              <span style={{ fontFamily: 'Rajdhani, sans-serif', fontSize: 10, fontWeight: 800, color: accent, letterSpacing: '0.3em', marginTop: 4, textTransform: 'uppercase', opacity: 0.9 }}>
+                CITIZEN PROFILE // {npc.role}
+              </span>
             </div>
             {/* Mode badge */}
-            <div style={{ ...row, gap: 6, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', padding: '4px 10px', borderRadius: 4 }}>
-              <div style={{ width: 6, height: 6, borderRadius: '50%', background: geminiText ? '#B042FF' : '#00E5FF', boxShadow: `0 0 6px ${geminiText ? '#B042FF' : '#00E5FF'}`, animation: 'pulse-soft 2s infinite' }} />
-              <span style={{ fontFamily: 'Rajdhani, sans-serif', fontSize: 10, fontWeight: 700, color: '#A0ABC0', letterSpacing: '0.15em' }}>{geminiText ? 'AI MODE' : 'SCRIPTED'}</span>
+            <div style={{ ...row, gap: 8, background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)', padding: '6px 12px', borderRadius: 4 }}>
+              <div style={{ width: 6, height: 6, borderRadius: '50%', background: geminiText ? '#B042FF' : '#00E5FF', boxShadow: `0 0 10px ${geminiText ? '#B042FF' : '#00E5FF'}`, animation: 'pulse-soft 2s infinite' }} />
+              <span style={{ fontFamily: 'Orbitron, sans-serif', fontSize: 9, fontWeight: 700, color: '#A0ABC0', letterSpacing: '0.15em' }}>{geminiText ? 'NEURAL' : 'CORE'}</span>
             </div>
           </div>
         </div>
@@ -185,29 +188,32 @@ export const DialogueBox: React.FC<Props> = ({ state, onChoice, onClose, geminiT
                   const enabled = !choice.requires || state.inventory.includes(choice.requires);
                   return (
                     <button key={i} onClick={() => enabled && onChoice(choice)} disabled={!enabled}
+                      className="choice-btn"
                       style={{
                         ...row, gap: 14,
-                        padding: '12px 18px', marginBottom: 8, borderRadius: 6, textAlign: 'left',
-                        background: 'rgba(15,21,35,0.7)',
-                        border: `1px solid rgba(0,229,255,0.14)`,
-                        borderLeft: `3px solid ${enabled ? accent : '#5A6B8A'}`,
-                        color: enabled ? '#F0F4F8' : '#5A6B8A',
+                        padding: '14px 20px', marginBottom: 10, borderRadius: 8, textAlign: 'left',
+                        background: 'rgba(15,21,35,0.85)',
+                        border: `1px solid rgba(255,255,255,0.1)`,
+                        borderLeft: `4px solid ${enabled ? accent : '#5A6B8A'}`,
+                        color: enabled ? '#FFF' : '#5A6B8A',
                         cursor: enabled ? 'pointer' : 'not-allowed',
-                        opacity: enabled ? 1 : 0.4,
-                        transition: 'all 0.2s ease',
+                        opacity: enabled ? 1 : 0.5,
+                        transition: 'all 0.3s cubic-bezier(0.16,1,0.3,1)',
                         fontFamily: 'Inter, sans-serif',
+                        position: 'relative', overflow: 'hidden'
                       }}
-                      onMouseEnter={e => { if (enabled) { (e.currentTarget as HTMLElement).style.background = `rgba(0,229,255,0.08)`; (e.currentTarget as HTMLElement).style.borderColor = `${accent}70`; }}}
-                      onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(15,21,35,0.7)'; (e.currentTarget as HTMLElement).style.borderColor = 'rgba(0,229,255,0.14)'; }}
                     >
-                      <span style={{ fontFamily: 'Orbitron, sans-serif', fontSize: 11, fontWeight: 700, color: enabled ? accent : '#5A6B8A', minWidth: 26, textShadow: enabled ? `0 0 6px ${accent}` : 'none' }}>
-                        {String(i + 1).padStart(2, '0')}.
+                      <span style={{ fontFamily: 'Orbitron, sans-serif', fontSize: 12, fontWeight: 900, color: enabled ? accent : '#5A6B8A', minWidth: 28, textShadow: enabled ? `0 0 8px ${accent}60` : 'none' }}>
+                        {String(i + 1).padStart(2, '0')}
                       </span>
-                      <span style={{ fontSize: 14, lineHeight: 1.5, flex: 1 }}>{choice.text}</span>
+                      <span style={{ fontSize: 15, lineHeight: 1.5, flex: 1, fontWeight: 500 }}>{choice.text}</span>
                       {!enabled && choice.requires && (
-                        <span style={{ fontFamily: 'Rajdhani, sans-serif', fontSize: 10, fontWeight: 700, color: '#FF3366', border: '1px solid #FF3366', padding: '2px 7px', borderRadius: 3, letterSpacing: '0.1em', flexShrink: 0 }}>LOCKED</span>
+                        <div style={{ ...row, gap: 6, background: 'rgba(255,51,102,0.1)', border: '1px solid #FF3366', padding: '3px 10px', borderRadius: 4 }}>
+                           <span style={{ fontSize: 10 }}>🔒</span>
+                           <span style={{ fontFamily: 'Rajdhani, sans-serif', fontSize: 10, fontWeight: 800, color: '#FF3366', letterSpacing: '0.1em' }}>ASSET REQUIRED</span>
+                        </div>
                       )}
-                      {enabled && <span style={{ color: accent, opacity: 0.5, fontSize: 18, marginLeft: 'auto' }}>›</span>}
+                      {enabled && <span style={{ color: accent, fontSize: 20, marginLeft: 'auto', animation: 'float 2s infinite' }}>›</span>}
                     </button>
                   );
                 })}

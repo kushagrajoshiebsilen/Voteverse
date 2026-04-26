@@ -8,6 +8,7 @@ export const INITIAL_STATE: GameState = {
   unlockedZones: ['neighborhood'],
   player: {
     pos: { x: 300, y: 400 },
+    z: 0,
     dir: 'down',
     speed: PLAYER_SPEED,
     frame: 0,
@@ -58,8 +59,19 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
         ...state,
         player: {
           ...state.player,
-          pos: action.payload,
+          pos: action.payload.pos,
+          z: action.payload.z ?? state.player.z,
         },
+      };
+
+    case 'JUMP_PLAYER':
+      if (state.player.z > 0) return state; // Prevent double jump
+      return {
+        ...state,
+        player: {
+          ...state.player,
+          z: 0.1, // Trigger jump cycle
+        }
       };
 
     case 'SET_ZONE': {
@@ -70,6 +82,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
         phase: 'playing',
         player: {
           ...state.player,
+          z: 0,
           pos: spawnPos,
         },
       };

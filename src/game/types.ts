@@ -16,6 +16,7 @@ export interface Rect {
 
 export interface Player {
   pos: Vec2;
+  z: number; // Altitude (Jump Height)
   dir: Direction;
   speed: number;
   frame: number;

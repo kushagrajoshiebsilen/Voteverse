@@ -3,907 +3,188 @@ import type { Zone, NPC, InteractableObject } from './types';
 // ──────────────────────────────────────────────
 // ZONE 1: NEIGHBORHOOD
 // ──────────────────────────────────────────────
-const neighborhoodNPCs: NPC[] = [
-  {
-    id: 'grandma_priya',
-    pos: { x: 520, y: 320 },
-    name: 'Priya Dadi',
-    role: 'Retired Teacher',
-    emoji: '👵',
-    color: '#f59e0b',
-    dir: 'down',
-    walkPattern: [{ x: 520, y: 320 }, { x: 580, y: 320 }, { x: 580, y: 370 }, { x: 520, y: 370 }],
-    walkIndex: 0,
-    walkTimer: 0,
-    currentNode: 'start',
-    dialogue: [
-      {
-        id: 'start',
-        speaker: 'Priya Dadi',
-        text: "Arré beta! You're finally 18 — you can vote now! I've voted in every election since 1975. But first, you need to register. Have you found your Aadhaar card?",
-        choices: [
-          { text: "Where do I find my documents?", next: 'docs_help', effect: { startQuest: 'q1_register', updateMeter: { awareness: 5 } } },
-          { text: "I'm on it, Dadi!", next: 'encouragement' },
-          { text: "Is voting really important?", next: 'importance' },
-        ],
-      },
-      {
-        id: 'docs_help',
-        speaker: 'Priya Dadi',
-        text: "Check the shelf in your house — your Aadhaar card and the electricity bill should be there. Those are your identity and address proof. Don't lose them!",
-        choices: [
-          { text: "Thanks, I'll look right away!", next: 'bye' },
-        ],
-      },
-      {
-        id: 'encouragement',
-        speaker: 'Priya Dadi',
-        text: "That's my grandchild! Remember — every vote counts. In 2014, some constituencies were decided by fewer than 100 votes. YOUR vote can change history!",
-        choices: [
-          { text: "I'll make you proud, Dadi!", next: 'bye' },
-        ],
-      },
-      {
-        id: 'importance',
-        speaker: 'Priya Dadi',
-        text: "In a democracy, your vote IS your voice. The government decides roads, schools, hospitals — all based on who wins. Not voting means letting others decide your future!",
-        choices: [
-          { text: "You're right. I should register!", next: 'bye', effect: { updateMeter: { awareness: 3 } } },
-        ],
-      },
-      {
-        id: 'bye',
-        speaker: 'Priya Dadi',
-        text: "Go on now! The registration office is east of here. I'll be cheering for you!",
-        next: '__end',
-      },
-    ],
-  },
-  {
-    id: 'neighbor_rajan',
-    pos: { x: 700, y: 450 },
-    name: 'Rajan',
-    role: 'Neighbor',
-    emoji: '🧑',
-    color: '#3b82f6',
-    dir: 'left',
-    currentNode: 'start',
-    dialogue: [
-      {
-        id: 'start',
-        speaker: 'Rajan',
-        text: "Hey! Did you know you can also register online at voters.eci.gov.in? Fill Form 6, upload your documents — takes 10 minutes! Or use the Voter Helpline App.",
-        choices: [
-          { text: "What's EPIC?", next: 'epic_info' },
-          { text: "What if I moved recently?", next: 'moved_info' },
-          { text: "Thanks for the tip!", next: 'bye' },
-        ],
-      },
-      {
-        id: 'epic_info',
-        speaker: 'Rajan',
-        text: "EPIC stands for Elector's Photo Identity Card — your voter ID! It has a unique EPIC number linked to your constituency. Protect it — it's your key to voting.",
-        choices: [{ text: "Got it!", next: 'bye' }],
-      },
-      {
-        id: 'moved_info',
-        speaker: 'Rajan',
-        text: "If you've moved, use Form 8A to transfer your registration to the new constituency. You need to update your address before the election rolls freeze!",
-        choices: [{ text: "Good to know!", next: 'bye', effect: { updateMeter: { awareness: 4 } } }],
-      },
-      {
-        id: 'bye',
-        speaker: 'Rajan',
-        text: "All the best! Go show them we care about democracy in this neighborhood!",
-        next: '__end',
-      },
-    ],
-  },
-];
-
-const neighborhoodObjects: InteractableObject[] = [
-  {
-    id: 'home_shelf',
-    pos: { x: 180, y: 200 },
-    size: { x: 60, y: 50 },
-    label: 'Document Shelf',
-    emoji: '🗄️',
-    hint: 'Press E to search the shelf',
-    zoneId: 'neighborhood',
-    isActive: true,
-    glowing: true,
-    interactAction: { startMiniGame: 'document_hunt', triggerEvent: 'search_shelf' },
-  },
-  {
-    id: 'notice_board',
-    pos: { x: 600, y: 180 },
-    size: { x: 55, y: 45 },
-    label: 'Notice Board',
-    emoji: '📌',
-    hint: 'Read election notices',
-    zoneId: 'neighborhood',
-    isActive: true,
-    interactAction: { updateMeter: { awareness: 5 }, addItem: 'newspaper', triggerEvent: 'read_notice' },
-  },
-  {
-    id: 'zone_exit_east',
-    pos: { x: 1140, y: 380 },
-    size: { x: 50, y: 80 },
-    label: 'Registration Office →',
-    emoji: '🚪',
-    hint: 'Travel to Registration Office',
-    zoneId: 'neighborhood',
-    isActive: true,
-    glowing: true,
-    interactAction: { unlockZone: 'registration', triggerEvent: 'go_registration' },
-  },
-];
+export const neighborhoodZone: Zone = {
+  id: 'neighborhood',
+  name: 'Voter Neighborhood',
+  description: 'Your home district. Start your democratic journey here.',
+  bgColor: '#0B0E14', accentColor: '#2ABFBF', emoji: '🏘️',
+  mapPosition: { x: 200, y: 350 },
+  unlocked: true,
+  buildings: [
+    { rect: { x: 100, y: 150, w: 250, d: 180, h: 90 }, color: '#334155', roofColor: '#1E293B', label: 'Residential Wing A', emoji: '🏠', style: 'office' },
+    { rect: { x: 450, y: 120, w: 350, d: 220, h: 110 }, color: '#475569', roofColor: '#0F172A', label: 'Chai Point Corner', emoji: '☕', style: 'office' }
+  ],
+  props: [
+    { id: 'lamp_1', type: 'lamp', pos: { x: 400, y: 350 }, size: { x: 10, y: 10 } },
+    { id: 'lamp_2', type: 'lamp', pos: { x: 850, y: 350 }, size: { x: 10, y: 10 } },
+    { id: 'bench_1', type: 'bench', pos: { x: 600, y: 500 }, size: { x: 40, y: 10 } }
+  ],
+  npcs: [
+    {
+      id: 'grandma_priya', pos: { x: 550, y: 350 }, name: 'Priya Dadi', role: 'Elder Citizen', emoji: '👵', color: '#f59e0b', dir: 'down', currentNode: 'start',
+      dialogue: [
+        {
+          id: 'start', speaker: 'Priya Dadi', text: "Namaste beta! To vote, you first need to register at the Administrative Center to the East.",
+          choices: [
+            { text: "Where are my docs?", next: 'docs', effect: { startQuest: 'q1_register' } },
+            { text: "I'm going now!", next: 'bye' }
+          ]
+        },
+        { id: 'docs', speaker: 'Priya Dadi', text: "Check your storage shelf in the house. Your Aadhaar is there!", next: '__end' },
+        { id: 'bye', speaker: 'Priya Dadi', text: "Good luck! The future is in your hands.", next: '__end' }
+      ]
+    }
+  ],
+  objects: [
+    { id: 'home_shelf', pos: { x: 200, y: 220 }, size: { x: 40, y: 40 }, label: 'Storage Shelf', emoji: '📦', isActive: true, zoneId: 'neighborhood', interactAction: { triggerEvent: 'search_shelf' } },
+    { id: 'exit_reg', pos: { x: 950, y: 380 }, size: { x: 60, y: 60 }, label: 'To Registration Center', emoji: '🏛️', isActive: true, zoneId: 'neighborhood', interactAction: { unlockZone: 'registration' } }
+  ]
+};
 
 // ──────────────────────────────────────────────
-// ZONE 2: REGISTRATION OFFICE
+// ZONE 2: REGISTRATION CENTER
 // ──────────────────────────────────────────────
-const registrationNPCs: NPC[] = [
-  {
-    id: 'booth_officer_meena',
-    pos: { x: 400, y: 280 },
-    name: 'Officer Meena',
-    role: 'ERO Assistant',
-    emoji: '👩‍💼',
-    color: '#8b5cf6',
-    dir: 'down',
-    currentNode: 'start',
-    hasQuest: 'q1_register',
-    dialogue: [
-      {
-        id: 'start',
-        speaker: 'Officer Meena',
-        text: "Welcome to the Electoral Registration Office! I'm an Electoral Registration Officer assistant. Do you have your Form 6, Aadhaar, and address proof ready?",
-        choices: [
-          { text: "Yes, I have all documents!", next: 'has_docs', requires: 'aadhaar_card', effect: { completeQuest: 'q1_register', addItem: 'voter_id', updateMeter: { turnout: 10, awareness: 5 } } },
-          { text: "I need Form 6", next: 'need_form' },
-          { text: "What is Form 6?", next: 'form6_explain' },
-          { text: "I don't have all docs", next: 'missing_docs' },
-        ],
-      },
-      {
-        id: 'has_docs',
-        speaker: 'Officer Meena',
-        text: "Excellent! All documents verified. I'm registering you now. Your EPIC — Voter ID Card — will be dispatched within 7 days. You're now a registered voter! 🎉",
-        next: 'registered',
-        effect: { addItem: 'voter_id', completeQuest: 'q1_register', updateMeter: { turnout: 15 } },
-      },
-      {
-        id: 'registered',
-        speaker: 'Officer Meena',
-        text: "Your voter ID number is DL/03/195/2024. You can vote in Booth No. 42, City Civic Hall. The election is next month — don't forget! Head to the campaign area to learn more.",
-        choices: [
-          { text: "Thank you! Going to the campaign area!", next: '__end', effect: { unlockZone: 'campaign', startQuest: 'q2_campaign' } },
-        ],
-      },
-      {
-        id: 'need_form',
-        speaker: 'Officer Meena',
-        text: "Form 6 is for fresh voter registration. You can get a paper copy here or fill it online at voters.eci.gov.in. Would you like me to give you a blank Form 6?",
-        choices: [
-          { text: "Yes please!", next: 'give_form', effect: { addItem: 'form6' } },
-          { text: "I'll do it online", next: 'online_info' },
-        ],
-      },
-      {
-        id: 'give_form',
-        speaker: 'Officer Meena',
-        text: "Here's Form 6. Fill it with your name, DOB, address, and relationship-based address details. Attach Aadhaar + address proof. Then come back to me!",
-        next: '__end',
-      },
-      {
-        id: 'form6_explain',
-        speaker: 'Officer Meena',
-        text: "Form 6 is the official application for voter registration under the Representation of the People Act, 1950. There's also Form 6B for NRIs, Form 8 for corrections, and Form 7 for deletion.",
-        choices: [{ text: "Now I get it!", next: 'need_form', effect: { updateMeter: { awareness: 5 } } }],
-      },
-      {
-        id: 'missing_docs',
-        speaker: 'Officer Meena',
-        text: "No worries! Go back, find your Aadhaar card and address proof (electricity bill, bank passbook, or rent agreement all work). Come back when you're ready!",
-        next: '__end',
-      },
-      {
-        id: 'online_info',
-        speaker: 'Officer Meena',
-        text: "Visit voters.eci.gov.in or use the Voter Helpline App. You can track your application status online too!",
-        next: '__end',
-        effect: { updateMeter: { awareness: 3 } },
-      },
-    ],
-  },
-  {
-    id: 'waiting_citizen',
-    pos: { x: 220, y: 400 },
-    name: 'Suresh',
-    role: 'Confused Citizen',
-    emoji: '😕',
-    color: '#ef4444',
-    dir: 'right',
-    currentNode: 'start',
-    dialogue: [
-      {
-        id: 'start',
-        speaker: 'Suresh',
-        text: "I've been waiting for 2 hours! They say my name isn't on the list. I voted last time — how can I be missing?",
-        choices: [
-          { text: "Let me help you check", next: 'help_check', effect: { updateMeter: { trust: 5 } } },
-          { text: "What happened?", next: 'explain' },
-          { text: "Try the Voter Helpline!", next: 'helpline', effect: { updateMeter: { awareness: 3 } } },
-        ],
-      },
-      {
-        id: 'help_check',
-        speaker: 'Suresh',
-        text: "My EPIC number is GJ/12/034/88721. Can you help me find my booth number? I think I may have been moved to a different constituency when I changed house.",
-        choices: [{ text: "Use the NVSP portal to search!", next: 'nvsp', effect: { addReputation: 10 } }],
-      },
-      {
-        id: 'explain',
-        speaker: 'Suresh',
-        text: "When you move, your registration doesn't automatically transfer. You must file Form 8A for constituency transfer. I should have done that when I changed my address!",
-        next: '__end',
-        effect: { updateMeter: { awareness: 4 } },
-      },
-      {
-        id: 'helpline',
-        speaker: 'Suresh',
-        text: "1950! I can call 1950? Let me try right now. Thank you so much! You're a lifesaver!",
-        next: '__end',
-        effect: { addReputation: 15, updateMeter: { trust: 8 } },
-      },
-      {
-        id: 'nvsp',
-        speaker: 'Suresh',
-        text: "It worked! I'm listed at Booth No. 67 in the new constituency. I can still vote! You're incredible! Here, take this — you might need it later.",
-        next: '__end',
-        effect: { addReputation: 20, updateMeter: { trust: 10, turnout: 8 } },
-      },
-    ],
-  },
-];
-
-const registrationObjects: InteractableObject[] = [
-  {
-    id: 'form_sorting_desk',
-    pos: { x: 600, y: 300 },
-    size: { x: 80, y: 60 },
-    label: 'Sorting Desk',
-    emoji: '📋',
-    hint: 'Help sort the voter forms!',
-    zoneId: 'registration',
-    isActive: true,
-    glowing: true,
-    interactAction: { startMiniGame: 'form_sorting', updateMeter: { trust: 5 } },
-  },
-  {
-    id: 'nvsp_computer',
-    pos: { x: 900, y: 250 },
-    size: { x: 60, y: 50 },
-    label: 'NVSP Terminal',
-    emoji: '💻',
-    hint: 'Check voter roll online',
-    zoneId: 'registration',
-    isActive: true,
-    interactAction: { updateMeter: { awareness: 8 }, triggerEvent: 'use_nvsp' },
-  },
-  {
-    id: 'reg_exit_east',
-    pos: { x: 1140, y: 380 },
-    size: { x: 50, y: 80 },
-    label: 'Campaign Street →',
-    emoji: '🚪',
-    hint: 'Head to the campaign area',
-    zoneId: 'registration',
-    isActive: true,
-    glowing: true,
-    interactAction: { unlockZone: 'campaign', triggerEvent: 'go_campaign' },
-  },
-];
+export const registrationZone: Zone = {
+  id: 'registration',
+  name: 'Registration Center',
+  description: 'Official Administrative Complex.',
+  bgColor: '#0F172A', accentColor: '#8B5CF6', emoji: '🏛️',
+  mapPosition: { x: 400, y: 350 },
+  unlocked: false,
+  buildings: [
+    { rect: { x: 200, y: 100, w: 800, d: 220, h: 140 }, color: '#334155', roofColor: '#1E293B', label: 'Electoral Registration Office', emoji: '🏛️', style: 'office' }
+  ],
+  props: [
+    { id: 'kiosk_1', type: 'kiosk', pos: { x: 450, y: 380 }, size: { x: 20, y: 20 } },
+    { id: 'barrier_1', type: 'barrier', pos: { x: 500, y: 460 }, size: { x: 60, y: 10 } },
+    { id: 'bench_1', type: 'bench', pos: { x: 400, y: 580 }, size: { x: 40, y: 10 } },
+    { id: 'desk_1', type: 'counter', pos: { x: 600, y: 320 }, size: { x: 80, y: 30 } }
+  ],
+  npcs: [
+    {
+      id: 'officer_meena', pos: { x: 600, y: 280 }, name: 'Officer Meena', role: 'ERO Assistant', emoji: '👩‍💼', color: '#8b5cf6', dir: 'down', currentNode: 'start',
+      dialogue: [
+        {
+          id: 'start', speaker: 'Officer Meena', text: "Welcome. Present your Aadhaar Card to receive your Voter ID.",
+          choices: [
+            { text: "Here is my Aadhaar!", next: 'verify', requires: 'aadhaar_card', effect: { completeQuest: 'q1_register', addItem: 'voter_id' } }
+          ]
+        },
+        { id: 'verify', speaker: 'Officer Meena', text: "Verified. You are now a registered voter! Head East to Campaign Street.", choices: [{ text: "Proceed", next: 'done', effect: { unlockZone: 'campaign' } }] },
+        { id: 'done', speaker: 'Officer Meena', text: "The candidates are waiting.", next: '__end' }
+      ]
+    }
+  ],
+  objects: [
+    { id: 'exit_camp', pos: { x: 1100, y: 400 }, size: { x: 60, y: 60 }, label: 'To Campaign Street', emoji: '🚩', isActive: true, zoneId: 'registration', interactAction: { unlockZone: 'campaign' } }
+  ]
+};
 
 // ──────────────────────────────────────────────
 // ZONE 3: CAMPAIGN STREET
 // ──────────────────────────────────────────────
-const campaignNPCs: NPC[] = [
-  {
-    id: 'campaign_worker_amit',
-    pos: { x: 350, y: 350 },
-    name: 'Amit (Campaign Worker)',
-    role: 'Campaign Volunteer',
-    emoji: '📣',
-    color: '#f97316',
-    dir: 'right',
-    currentNode: 'start',
-    walkPattern: [{ x: 350, y: 350 }, { x: 450, y: 350 }, { x: 450, y: 420 }, { x: 350, y: 420 }],
-    walkIndex: 0,
-    walkTimer: 0,
-    dialogue: [
-      {
-        id: 'start',
-        speaker: 'Amit',
-        text: "Hey there! We're campaigning for our candidate. Want a flyer? Just so you know — the Model Code of Conduct means we can't offer gifts, use government vehicles, or bribe voters. We play fair!",
-        choices: [
-          { text: "Take a flyer", next: 'take_flyer', effect: { addItem: 'candidate_flyer', updateMeter: { awareness: 3 } } },
-          { text: "What's the Model Code of Conduct?", next: 'mcc_info' },
-          { text: "I saw someone distributing cash!", next: 'report_cash', effect: { updateMeter: { ethics: 10 }, addReputation: 15 } },
-        ],
-      },
-      {
-        id: 'take_flyer',
-        speaker: 'Amit',
-        text: "Here you go! Our candidate promises to build 3 new schools and expand the public transport network. Remember to check credentials on the ECI website though — verify, don't blindly trust!",
-        choices: [{ text: "Thanks, I'll check it out!", next: '__end' }],
-      },
-      {
-        id: 'mcc_info',
-        speaker: 'Amit',
-        text: "The Model Code of Conduct is a set of rules by the Election Commission that all parties must follow from announcement day to results. It covers rallies, speeches, use of money, and government announcements.",
-        choices: [{ text: "Powerful! What if someone violates it?", next: 'violation' }],
-      },
-      {
-        id: 'violation',
-        speaker: 'Amit',
-        text: "You can report MCC violations to the cVIGIL app by the ECI! Upload photo or video evidence, and the Returning Officer must respond within 100 minutes. Democracy has teeth!",
-        choices: [{ text: "Amazing! I'll keep my eyes open.", next: '__end', effect: { updateMeter: { ethics: 5, trust: 5 } } }],
-      },
-      {
-        id: 'report_cash',
-        speaker: 'Amit',
-        text: "That's a serious violation! Report it on the cVIGIL app immediately. Voter bribery is a criminal offense under Section 171B of IPC. Thank you for being vigilant!",
-        next: '__end',
-        effect: { updateMeter: { ethics: 15 }, addReputation: 20 },
-      },
-    ],
-  },
-  {
-    id: 'fake_news_aunty',
-    pos: { x: 700, y: 300 },
-    name: 'Sheila Auntie',
-    role: 'Misinformation Spreader',
-    emoji: '📢',
-    color: '#dc2626',
-    dir: 'left',
-    currentNode: 'start',
-    dialogue: [
-      {
-        id: 'start',
-        speaker: 'Sheila Auntie',
-        text: "Beta! Don't vote for Party B — I heard they'll cancel all pensions if they win! Also, voting machines are fixed! Just forward this message to everyone!",
-        choices: [
-          { text: "That sounds like fake news!", next: 'call_out', effect: { updateMeter: { ethics: 8, trust: 5 } } },
-          { text: "Where did you hear this?", next: 'source' },
-          { text: "I'll check the facts first", next: 'fact_check', effect: { updateMeter: { awareness: 5 } } },
-        ],
-      },
-      {
-        id: 'call_out',
-        speaker: 'Sheila Auntie',
-        text: "Maybe you're right... I heard it from Ramesh who heard it from his cousin. I should verify before spreading it. Tell me — how do I check if something is true?",
-        choices: [{ text: "Check PIB Fact Check and official ECI website!", next: 'educate', effect: { addReputation: 20 } }],
-      },
-      {
-        id: 'source',
-        speaker: 'Sheila Auntie',
-        text: "I got it on WhatsApp! 50 people forwarded it so it must be true... right?",
-        choices: [{ text: "No! Viral doesn't mean true. Check PIB!", next: 'educate', effect: { updateMeter: { awareness: 8 } } }],
-      },
-      {
-        id: 'fact_check',
-        speaker: 'Sheila Auntie',
-        text: "You're smart! Use PIB Fact Check at pib.gov.in, or call the ECI helpline 1950. Don't spread unverified information during elections — it can affect results unfairly!",
-        next: '__end',
-        effect: { updateMeter: { awareness: 5, ethics: 5 } },
-      },
-      {
-        id: 'educate',
-        speaker: 'Sheila Auntie',
-        text: "You're right, I'm sorry. The EVM machines go through rigorous testing — even the Supreme Court has upheld their integrity. I should think before I forward things. Thank you!",
-        next: '__end',
-        effect: { updateMeter: { trust: 10, ethics: 10 }, addReputation: 15 },
-      },
-    ],
-  },
-  {
-    id: 'journalist_pradeep',
-    pos: { x: 900, y: 420 },
-    name: 'Pradeep (Reporter)',
-    role: 'Election Journalist',
-    emoji: '📰',
-    color: '#0ea5e9',
-    dir: 'down',
-    currentNode: 'start',
-    dialogue: [
-      {
-        id: 'start',
-        speaker: 'Pradeep',
-        text: "Covering the election for City Daily! Did you know the Paid News phenomenon is a major challenge? Newspapers get paid to publish positive stories as real news. It's election fraud!",
-        choices: [
-          { text: "How do we stop Paid News?", next: 'paid_news' },
-          { text: "What's your biggest story?", next: 'story' },
-          { text: "Good luck with your coverage!", next: '__end' },
-        ],
-      },
-      {
-        id: 'paid_news',
-        speaker: 'Pradeep',
-        text: "The Media Certification & Monitoring Committee reviews all political ads. If paid content isn't labeled as 'Paid Political Advertisement,' it's a violation. You can complain to the ECI!",
-        choices: [{ text: "The system has checks everywhere!", next: '__end', effect: { updateMeter: { awareness: 8, trust: 5 } } }],
-      },
-      {
-        id: 'story',
-        speaker: 'Pradeep',
-        text: "I'm investigating a candidate who hasn't declared their criminal record in their affidavit. Every candidate MUST disclose pending criminal cases. It's mandated by the Supreme Court!",
-        choices: [{ text: "Where can voters check affidavits?", next: 'affidavit', effect: { updateMeter: { awareness: 5 } } }],
-      },
-      {
-        id: 'affidavit',
-        speaker: 'Pradeep',
-        text: "Myneta.info — incredible website! Shows all candidates' declared assets, criminal records, and education. Informed voting is the best voting!",
-        next: '__end',
-        effect: { updateMeter: { awareness: 10 } },
-      },
-    ],
-  },
-];
-
-const campaignObjects: InteractableObject[] = [
-  {
-    id: 'fake_banner',
-    pos: { x: 550, y: 150 },
-    size: { x: 120, y: 40 },
-    label: 'Suspicious Banner',
-    emoji: '🚩',
-    hint: 'Examine this banner',
-    zoneId: 'campaign',
-    isActive: true,
-    glowing: true,
-    interactAction: { startMiniGame: 'misinformation_stop', updateMeter: { ethics: 5 }, triggerEvent: 'banner_event' },
-  },
-  {
-    id: 'cvigil_kiosk',
-    pos: { x: 800, y: 200 },
-    size: { x: 60, y: 55 },
-    label: 'cVIGIL Kiosk',
-    emoji: '📱',
-    hint: 'Report MCC violations',
-    zoneId: 'campaign',
-    isActive: true,
-    interactAction: { updateMeter: { ethics: 10, trust: 5 }, addReputation: 10, triggerEvent: 'use_cvigil' },
-  },
-  {
-    id: 'campaign_exit_east',
-    pos: { x: 1140, y: 380 },
-    size: { x: 50, y: 80 },
-    label: 'Polling Booth →',
-    emoji: '🚪',
-    hint: 'Go to the Polling Booth',
-    zoneId: 'campaign',
-    isActive: true,
-    glowing: true,
-    interactAction: { unlockZone: 'polling', triggerEvent: 'go_polling', startQuest: 'q3_vote' },
-  },
-];
+export const campaignZone: Zone = {
+  id: 'campaign',
+  name: 'Campaign Street',
+  description: 'The heart of democratic debate.',
+  bgColor: '#1A1C24', accentColor: '#FFB800', emoji: '🚩',
+  mapPosition: { x: 600, y: 350 },
+  unlocked: false,
+  buildings: [
+    { rect: { x: 300, y: 100, w: 600, d: 200, h: 120 }, color: '#451A03', roofColor: '#78350F', label: 'Media & Press Hub', emoji: '📰', style: 'office' }
+  ],
+  props: [
+    { id: 'rally_1', type: 'counter', pos: { x: 600, y: 350 }, size: { x: 100, y: 40 } },
+    { id: 'barrier_c1', type: 'barrier', pos: { x: 400, y: 450 }, size: { x: 80, y: 10 } },
+    { id: 'lamp_c1', type: 'lamp', pos: { x: 300, y: 380 }, size: { x: 10, y: 10 } }
+  ],
+  npcs: [
+    {
+      id: 'candidate_rahul', pos: { x: 600, y: 300 }, name: 'Rahul', role: 'Candidate', emoji: '🎤', color: '#FFB800', dir: 'down', currentNode: 'start',
+      dialogue: [
+        {
+          id: 'start', speaker: 'Rahul', text: "My vision for this district is growth! Are you ready to vote for progress?",
+          choices: [
+            { text: "What about education?", next: 'edu', effect: { updateMeter: { awareness: 10 } } },
+            { text: "How do I vote?", next: 'how' }
+          ]
+        },
+        { id: 'edu', speaker: 'Rahul', text: "We will build 5 new schools! Education is the backbone of democracy.", next: '__end' },
+        { id: 'how', speaker: 'Rahul', text: "The Polling Booth is further East. You'll need your Voter ID!", next: '__end', effect: { unlockZone: 'polling' } }
+      ]
+    }
+  ],
+  objects: [
+    { id: 'exit_poll', pos: { x: 1100, y: 400 }, size: { x: 60, y: 60 }, label: 'To Polling Booth', emoji: '🗳️', isActive: true, zoneId: 'campaign', interactAction: { unlockZone: 'polling' } }
+  ]
+};
 
 // ──────────────────────────────────────────────
 // ZONE 4: POLLING BOOTH
 // ──────────────────────────────────────────────
-const pollingNPCs: NPC[] = [
-  {
-    id: 'presiding_officer',
-    pos: { x: 500, y: 280 },
-    name: 'Presiding Officer Sharma',
-    role: 'Polling Officer',
-    emoji: '🧑‍⚖️',
-    color: '#0891b2',
-    dir: 'down',
-    currentNode: 'start',
-    hasQuest: 'q3_vote',
-    dialogue: [
-      {
-        id: 'start',
-        speaker: 'Officer Sharma',
-        text: "This is Polling Booth No. 42. Please show your EPIC (Voter ID). We also accept: Passport, Driving License, PAN Card, Aadhaar — 12 documents in total are valid.",
-        choices: [
-          { text: "I have my Voter ID!", next: 'check_id', requires: 'voter_id', effect: { updateMeter: { turnout: 10 } } },
-          { text: "How does the EVM work?", next: 'evm_explain' },
-          { text: "Can someone accompany me?", next: 'companion' },
-          { text: "What are my rights here?", next: 'rights' },
-        ],
-      },
-      {
-        id: 'check_id',
-        speaker: 'Officer Sharma',
-        text: "Identity verified! Proceeding to mark your name on the electoral roll. Please proceed to the inking officer — your left index finger will be marked with indelible ink.",
-        choices: [{ text: "Ready to vote!", next: 'ink_station', effect: { updateMeter: { turnout: 5 } } }],
-      },
-      {
-        id: 'ink_station',
-        speaker: 'Officer Sharma',
-        text: "Indelible ink prevents double voting — it cannot be removed for 2 weeks. This is Indian democracy's first line of integrity. Now go to Booth 3 to cast your vote on the EVM.",
-        choices: [{ text: "Take me to the EVM!", next: '__end', effect: { startMiniGame: 'evm_voting', addItem: 'ink_badge' } }],
-      },
-      {
-        id: 'evm_explain',
-        speaker: 'Officer Sharma',
-        text: "EVM stands for Electronic Voting Machine. It has two units — the Ballot Unit with candidate buttons, and the Control Unit operated by the polling officer. The VVPAT unit shows a paper slip confirming your vote!",
-        choices: [
-          { text: "Is the EVM hackable?", next: 'evm_secure' },
-          { text: "Let me vote now!", next: 'check_id', requires: 'voter_id' },
-        ],
-      },
-      {
-        id: 'evm_secure',
-        speaker: 'Officer Sharma',
-        text: "EVMs are standalone devices — no WiFi, no Bluetooth, no network connection ever. They're tested by BEL and ECIL engineers, randomized across booths, and verified by all candidates' agents. The Supreme Court and 45+ countries have validated their use!",
-        choices: [{ text: "That's reassuring!", next: 'start', effect: { updateMeter: { trust: 10 } } }],
-      },
-      {
-        id: 'companion',
-        speaker: 'Officer Sharma',
-        text: "Yes! Voters with disabilities may bring a companion of their choice. We also have Braille-enabled EVMs and wheelchair accessible booths in all polling stations.",
-        choices: [{ text: "Democracy is inclusive!", next: '__end', effect: { updateMeter: { awareness: 5, trust: 3 } } }],
-      },
-      {
-        id: 'rights',
-        speaker: 'Officer Sharma',
-        text: "You have the right to NOTA (None of the Above), the right to secret ballot, the right to challenge any irregularity, and the right to a VVPAT paper slip verification. Democracy protects your choice!",
-        choices: [{ text: "NOTA? Tell me more!", next: 'nota' }],
-      },
-      {
-        id: 'nota',
-        speaker: 'Officer Sharma',
-        text: "NOTA — the last option on every EVM — lets you reject all candidates. Introduced by Supreme Court in 2013, it sends a powerful message. Though NOTA can't win the seat, it registers your protest vote!",
-        next: '__end',
-        effect: { updateMeter: { awareness: 8 } },
-      },
-    ],
-  },
-  {
-    id: 'lost_voter_kavya',
-    pos: { x: 250, y: 450 },
-    name: 'Kavya',
-    role: 'Lost Voter',
-    emoji: '😰',
-    color: '#ec4899',
-    dir: 'up',
-    currentNode: 'start',
-    dialogue: [
-      {
-        id: 'start',
-        speaker: 'Kavya',
-        text: "Excuse me! I don't know which booth to go to. My voter slip says Section 12, Part 3. Is that here? I'm scared of missing the closing time!",
-        choices: [
-          { text: "Let me help you navigate!", next: 'help', effect: { startMiniGame: 'booth_navigation' } },
-          { text: "Check your EPIC number on your phone!", next: 'phone_help' },
-          { text: "Call 1950 helpline!", next: 'helpline' },
-        ],
-      },
-      {
-        id: 'help',
-        speaker: 'Kavya',
-        text: "You're amazing! Yes, let's go through the voter navigation together. I was panicking — this is my first time voting and I don't want to miss it!",
-        next: '__end',
-        effect: { addReputation: 25, updateMeter: { turnout: 12 } },
-      },
-      {
-        id: 'phone_help',
-        speaker: 'Kavya',
-        text: "The Voter Helpline App! I have it installed! Let me check... Found it — I'm at Booth No. 38, Community Hall. That's just 200 meters away! Thank you!",
-        next: '__end',
-        effect: { addReputation: 20, updateMeter: { turnout: 10 } },
-      },
-      {
-        id: 'helpline',
-        speaker: 'Kavya',
-        text: "1950 — the national voter helpline! They found my booth instantly. Government services are getting better! I can still vote — thank you so much!",
-        next: '__end',
-        effect: { addReputation: 15, updateMeter: { turnout: 8, trust: 5 } },
-      },
-    ],
-  },
-];
-
-const pollingObjects: InteractableObject[] = [
-  {
-    id: 'evm_machine',
-    pos: { x: 750, y: 280 },
-    size: { x: 70, y: 80 },
-    label: 'EVM Machine',
-    emoji: '🗳️',
-    hint: 'Cast your vote!',
-    zoneId: 'polling',
-    isActive: true,
-    glowing: true,
-    interactAction: { startMiniGame: 'evm_voting', updateMeter: { turnout: 15 }, completeQuest: 'q3_vote' },
-  },
-  {
-    id: 'voter_help_desk',
-    pos: { x: 300, y: 300 },
-    size: { x: 60, y: 55 },
-    label: 'Help Desk',
-    emoji: '🆘',
-    hint: 'Help other voters',
-    zoneId: 'polling',
-    isActive: true,
-    interactAction: { startMiniGame: 'voter_help', updateMeter: { trust: 8 }, addReputation: 15 },
-  },
-  {
-    id: 'polling_exit',
-    pos: { x: 1140, y: 380 },
-    size: { x: 50, y: 80 },
-    label: 'Results Square →',
-    emoji: '🚪',
-    hint: 'Go to Results Square',
-    zoneId: 'polling',
-    isActive: true,
-    glowing: true,
-    interactAction: { unlockZone: 'results', triggerEvent: 'go_results', startQuest: 'q4_results' },
-  },
-];
+export const pollingZone: Zone = {
+  id: 'polling',
+  name: 'Polling Pavilion',
+  description: 'Cast your vote in a secure environment.',
+  bgColor: '#064E3B', accentColor: '#10B981', emoji: '🗳️',
+  mapPosition: { x: 800, y: 350 },
+  unlocked: false,
+  buildings: [
+    { rect: { x: 200, y: 150, w: 800, d: 250, h: 100 }, color: '#064E3B', roofColor: '#065F46', label: 'Electoral Voting Hall', emoji: '🏢', style: 'office' }
+  ],
+  props: [
+    { id: 'v_booth_1', type: 'kiosk', pos: { x: 400, y: 300 }, size: { x: 30, y: 30 } },
+    { id: 'v_booth_2', type: 'kiosk', pos: { x: 600, y: 300 }, size: { x: 30, y: 30 } },
+    { id: 'v_booth_3', type: 'kiosk', pos: { x: 800, y: 300 }, size: { x: 30, y: 30 } }
+  ],
+  npcs: [
+    {
+      id: 'booth_officer', pos: { x: 600, y: 250 }, name: 'Booth Officer', role: 'Election Official', emoji: '👮', color: '#10B981', dir: 'down', currentNode: 'start',
+      dialogue: [
+        {
+          id: 'start', speaker: 'Booth Officer', text: "Please present your Voter ID for the ink mark and access to the EVM.",
+          choices: [
+            { text: "I have my Voter ID!", next: 'vote', requires: 'voter_id', effect: { updateMeter: { turnout: 25 } } }
+          ]
+        },
+        { id: 'vote', speaker: 'Booth Officer', text: "Proceed to Booth 2. Your vote is your power!", choices: [{ text: "Cast Vote", next: 'done', effect: { unlockZone: 'results' } }] },
+        { id: 'done', speaker: 'Booth Officer', text: "Thank you for voting. Check the Results Hall to the East.", next: '__end' }
+      ]
+    }
+  ],
+  objects: [
+    { id: 'exit_res', pos: { x: 1100, y: 400 }, size: { x: 60, y: 60 }, label: 'To Results Hall', emoji: '📊', isActive: true, zoneId: 'polling', interactAction: { unlockZone: 'results' } }
+  ]
+};
 
 // ──────────────────────────────────────────────
-// ZONE 5: RESULTS SQUARE
+// ZONE 5: RESULTS HALL
 // ──────────────────────────────────────────────
-const resultsNPCs: NPC[] = [
-  {
-    id: 'returning_officer',
-    pos: { x: 500, y: 300 },
-    name: 'Returning Officer Jha',
-    role: 'District Returning Officer',
-    emoji: '🏛️',
-    color: '#d97706',
-    dir: 'down',
-    currentNode: 'start',
-    hasQuest: 'q4_results',
-    dialogue: [
-      {
-        id: 'start',
-        speaker: 'Returning Officer Jha',
-        text: "Welcome to the Counting Center! Votes are counted on counting day. EVMs are transported under security seal from strong rooms. Agents of all candidates witness every step. Full transparency!",
-        choices: [
-          { text: "How are votes counted?", next: 'counting_process' },
-          { text: "Who declares the winner?", next: 'declaration' },
-          { text: "What if results are disputed?", next: 'dispute' },
-          { text: "Let me help with the count!", next: 'help_count', effect: { completeQuest: 'q4_results', updateMeter: { trust: 15 }, addItem: 'champion_medal' } },
-        ],
-      },
-      {
-        id: 'counting_process',
-        speaker: 'Returning Officer Jha',
-        text: "Counting starts with postal ballots. Then EVM counting rounds begin — each round counts votes from specific booths. A running tally is maintained transparently. It usually takes 5-8 hours!",
-        choices: [{ text: "What's a postal ballot?", next: 'postal' }],
-      },
-      {
-        id: 'postal',
-        speaker: 'Returning Officer Jha',
-        text: "Service voters — armed forces, paramilitary, government employees on election duty — can vote by post. Their ballots are sent and received by mail. They count first!",
-        choices: [{ text: "The system covers everyone!", next: 'start', effect: { updateMeter: { awareness: 6 } } }],
-      },
-      {
-        id: 'declaration',
-        speaker: 'Returning Officer Jha',
-        text: "I declare the winner! The candidate with the highest valid votes in a constituency wins by First Past The Post system. I issue Form 21E — the official result. Then the Certificate of Election!",
-        choices: [{ text: "What's FPTP?", next: 'fptp' }],
-      },
-      {
-        id: 'fptp',
-        speaker: 'Returning Officer Jha',
-        text: "First Past The Post — the candidate with the most votes wins, even if it's not a majority. India uses this for Lok Sabha and Assembly elections. Simple and fast, though debated by political scientists!",
-        choices: [{ text: "Fascinating!", next: '__end', effect: { updateMeter: { awareness: 8 } } }],
-      },
-      {
-        id: 'dispute',
-        speaker: 'Returning Officer Jha',
-        text: "Candidates can file an Election Petition in the High Court within 45 days. The court examines the process, not just the votes. This is the appeal mechanism of Indian democracy!",
-        choices: [{ text: "Democracy has layers!", next: '__end', effect: { updateMeter: { trust: 8 } } }],
-      },
-      {
-        id: 'help_count',
-        speaker: 'Returning Officer Jha',
-        text: "Outstanding! You've been exemplary throughout this election. You registered, fought misinformation, voted, and now helped count. You're a true Democracy Champion! 🏆",
-        next: 'ending_trigger',
-        effect: { completeQuest: 'q4_results', addItem: 'champion_medal', addReputation: 50 },
-      },
-      {
-        id: 'ending_trigger',
-        speaker: 'Returning Officer Jha',
-        text: "The city's Democracy Score has risen significantly because of citizens like you. VoteVerse is complete — but real democracy never ends. See you next election!",
-        next: '__end',
-        effect: { triggerEvent: 'trigger_ending' },
-      },
-    ],
-  },
-  {
-    id: 'celebration_citizen',
-    pos: { x: 750, y: 450 },
-    name: 'Ramesh',
-    role: 'Happy Voter',
-    emoji: '🎉',
-    color: '#22c55e',
-    dir: 'left',
-    currentNode: 'start',
-    dialogue: [
-      {
-        id: 'start',
-        speaker: 'Ramesh',
-        text: "We did it! The election was free and fair. 73% turnout in our constituency — the highest in 20 years! People like you who spread awareness made the difference!",
-        choices: [
-          { text: "What's next after elections?", next: 'next' },
-          { text: "Democracy never sleeps!", next: '__end', effect: { addReputation: 10 } },
-        ],
-      },
-      {
-        id: 'next',
-        speaker: 'Ramesh',
-        text: "The winning candidate takes oath, the house convenes, and policies are made. But a citizen's job isn't over — hold your elected representatives accountable through RTI, public hearings, and the next election!",
-        next: '__end',
-        effect: { updateMeter: { awareness: 10 }, addReputation: 15 },
-      },
-    ],
-  },
-];
+export const resultsZone: Zone = {
+  id: 'results',
+  name: 'Democratic Theater',
+  description: 'The final tally of the city voice.',
+  bgColor: '#4C1D95', accentColor: '#D946EF', emoji: '📊',
+  mapPosition: { x: 1000, y: 350 },
+  unlocked: false,
+  buildings: [
+    { rect: { x: 100, y: 100, w: 1000, d: 300, h: 200 }, color: '#2E1065', roofColor: '#4C1D95', label: 'Grand Counting Chamber', emoji: '🏛️', style: 'office' }
+  ],
+  props: [
+    { id: 'screen_1', type: 'counter', pos: { x: 600, y: 200 }, size: { x: 400, y: 40 } }
+  ],
+  npcs: [
+    {
+      id: 'announcer', pos: { x: 600, y: 250 }, name: 'Announcer', role: 'State Commissioner', emoji: '🎙️', color: '#D946EF', dir: 'down', currentNode: 'start',
+      dialogue: [
+        { id: 'start', speaker: 'Announcer', text: "The results are in! Democracy has won today. You played your part!", next: 'end' },
+        { id: 'end', speaker: 'Announcer', text: "Thank you for completing your journey as a first-time voter.", choices: [{ text: "Finish Journey", next: '__end', effect: { triggerEvent: 'trigger_ending' } }] }
+      ]
+    }
+  ],
+  objects: [
+    { id: 'exit_home', pos: { x: 100, y: 400 }, size: { x: 60, y: 60 }, label: 'Return Home', emoji: '🏠', isActive: true, zoneId: 'results', interactAction: { unlockZone: 'neighborhood' } }
+  ]
+};
 
-const resultsObjects: InteractableObject[] = [
-  {
-    id: 'result_board',
-    pos: { x: 600, y: 180 },
-    size: { x: 150, y: 60 },
-    label: 'Result Tally Board',
-    emoji: '📊',
-    hint: 'See the election results',
-    zoneId: 'results',
-    isActive: true,
-    glowing: true,
-    interactAction: { updateMeter: { trust: 10, awareness: 5 }, triggerEvent: 'show_results' },
-  },
-  {
-    id: 'certificate_desk',
-    pos: { x: 900, y: 300 },
-    size: { x: 70, y: 60 },
-    label: 'Victory Certificate',
-    emoji: '🏆',
-    hint: 'Claim your Democracy Champion medal',
-    zoneId: 'results',
-    isActive: true,
-    interactAction: { addItem: 'champion_medal', addReputation: 30, triggerEvent: 'trigger_ending' },
-  },
-];
-
-// ──────────────────────────────────────────────
-// ZONE DEFINITIONS
-// ──────────────────────────────────────────────
-export const ZONES: Zone[] = [
-  {
-    id: 'neighborhood',
-    name: 'Shanti Nagar District',
-    description: 'A vibrant residential neighborhood where community and civic duty meet. Find your documents and start your journey.',
-    bgColor: '#141B2D',
-    accentColor: '#4ade80',
-    emoji: '🏘️',
-    mapPosition: { x: 60, y: 180 },
-    unlocked: true,
-    buildings: [
-      { rect: { x: 50, y: 120, w: 220, h: 200, d: 160 }, color: '#334155', roofColor: '#1E293B', label: 'The Heritage Apartments', emoji: '🏠' },
-      { rect: { x: 580, y: 80, w: 140, h: 100, d: 100 }, color: '#B91C1C', roofColor: '#7F1D1D', label: "Chai Point Corner", emoji: '☕' },
-      { rect: { x: 880, y: 100, w: 260, h: 220, d: 180 }, color: '#1E40AF', roofColor: '#1E3A8A', label: 'Civic Community Hall', emoji: '🏢' },
-    ],
-    npcs: neighborhoodNPCs,
-    objects: neighborhoodObjects,
-    props: [
-      { id: 'road_main', type: 'sidewalk', pos: { x: 0, y: 400 }, size: { x: 1200, y: 120 } },
-      { id: 'crossing_1', type: 'crossing', pos: { x: 400, y: 400 }, size: { x: 100, y: 120 } },
-      { id: 'crossing_2', type: 'crossing', pos: { x: 800, y: 400 }, size: { x: 100, y: 120 } },
-      { id: 'lamp_1', type: 'lamp', pos: { x: 150, y: 380 }, size: { x: 10, y: 60 } },
-      { id: 'lamp_2', type: 'lamp', pos: { x: 450, y: 380 }, size: { x: 10, y: 60 } },
-      { id: 'lamp_3', type: 'lamp', pos: { x: 750, y: 380 }, size: { x: 10, y: 60 } },
-      { id: 'lamp_4', type: 'lamp', pos: { x: 1050, y: 380 }, size: { x: 10, y: 60 } },
-      { id: 'tree_1', type: 'tree', pos: { x: 320, y: 150 }, size: { x: 40, y: 60 } },
-      { id: 'tree_2', type: 'tree', pos: { x: 380, y: 220 }, size: { x: 45, y: 70 } },
-      { id: 'tree_3', type: 'tree', pos: { x: 780, y: 120 }, size: { x: 40, y: 60 } },
-      { id: 'tree_4', type: 'tree', pos: { x: 820, y: 250 }, size: { x: 50, y: 80 } },
-      { id: 'bench_1', type: 'bench', pos: { x: 350, y: 340 }, size: { x: 60, y: 20 } },
-      { id: 'bench_2', type: 'bench', pos: { x: 720, y: 340 }, size: { x: 60, y: 20 } },
-      { id: 'trash_1', type: 'trash_bin', pos: { x: 420, y: 360 }, size: { x: 15, y: 25 } },
-    ],
-  },
-  {
-    id: 'registration',
-    name: 'Electoral Registration Office',
-    description: 'The government office where voters register and forms are processed.',
-    bgColor: '#1A1D2E',
-    accentColor: '#818cf8',
-    emoji: '🏛️',
-    mapPosition: { x: 220, y: 180 },
-    unlocked: false,
-    buildings: [
-      { rect: { x: 350, y: 80, w: 500, h: 240, d: 200 }, color: '#312E81', roofColor: '#1E1B4B', label: 'District Registration Centre', emoji: '🏛️' },
-      { rect: { x: 50, y: 120, w: 200, h: 140, d: 120 }, color: '#1E293B', roofColor: '#0F172A', label: 'Voter Info Kiosk', emoji: 'ℹ️' },
-    ],
-    npcs: registrationNPCs,
-    objects: registrationObjects,
-    props: [
-      { id: 'reg_road', type: 'sidewalk', pos: { x: 0, y: 400 }, size: { x: 1200, y: 100 } },
-      { id: 'reg_fence', type: 'fence', pos: { x: 0, y: 350 }, size: { x: 1200, y: 10 } },
-      { id: 'lamp_reg_1', type: 'lamp', pos: { x: 200, y: 380 }, size: { x: 10, y: 60 } },
-      { id: 'lamp_reg_2', type: 'lamp', pos: { x: 900, y: 380 }, size: { x: 10, y: 60 } },
-      { id: 'bench_reg', type: 'bench', pos: { x: 450, y: 330 }, size: { x: 120, y: 20 } },
-      { id: 'tree_reg_1', type: 'tree', pos: { x: 1000, y: 150 }, size: { x: 50, y: 70 } },
-    ],
-  },
-  {
-    id: 'campaign',
-    name: 'Unity Public Square',
-    description: 'The bustling public square where candidates campaign and information spreads.',
-    bgColor: '#2E1E1E',
-    accentColor: '#f97316',
-    emoji: '📣',
-    mapPosition: { x: 380, y: 180 },
-    unlocked: false,
-    buildings: [
-      { rect: { x: 100, y: 80, w: 350, h: 200, d: 180 }, color: '#7C2D12', roofColor: '#431407', label: 'Election Media Hub', emoji: '🎙️' },
-      { rect: { x: 750, y: 100, w: 350, h: 200, d: 180 }, color: '#451A03', roofColor: '#200D02', label: 'Political Alliance HQ', emoji: '🤝' },
-    ],
-    npcs: campaignNPCs,
-    objects: campaignObjects,
-    props: [
-      { id: 'camp_road', type: 'sidewalk', pos: { x: 0, y: 420 }, size: { x: 1200, y: 140 } },
-      { id: 'statue_base', type: 'bench', pos: { x: 550, y: 300 }, size: { x: 100, y: 40 } },
-      { id: 'poster_wall_1', type: 'poster', pos: { x: 500, y: 100 }, size: { x: 80, y: 100 } },
-      { id: 'lamp_camp_1', type: 'lamp', pos: { x: 300, y: 400 }, size: { x: 10, y: 60 } },
-      { id: 'lamp_camp_2', type: 'lamp', pos: { x: 800, y: 400 }, size: { x: 10, y: 60 } },
-      { id: 'tree_camp_1', type: 'tree', pos: { x: 50, y: 320 }, size: { x: 60, y: 80 } },
-      { id: 'tree_camp_2', type: 'tree', pos: { x: 1100, y: 320 }, size: { x: 60, y: 80 } },
-    ],
-  },
-  {
-    id: 'polling',
-    name: 'Government Primary School',
-    description: 'A local school transformed into a secure Polling Station for election day.',
-    bgColor: '#1E2D3E',
-    accentColor: '#38bdf8',
-    emoji: '🗳️',
-    mapPosition: { x: 540, y: 180 },
-    unlocked: false,
-    buildings: [
-      { rect: { x: 200, y: 80, w: 800, h: 260, d: 240 }, color: '#0F172A', roofColor: '#020617', label: 'Main Polling Wing (Booth 42)', emoji: '🏫' },
-    ],
-    npcs: pollingNPCs,
-    objects: pollingObjects,
-    props: [
-      { id: 'poll_road', type: 'sidewalk', pos: { x: 0, y: 450 }, size: { x: 1200, y: 80 } },
-      { id: 'barrier_1', type: 'fence', pos: { x: 150, y: 350 }, size: { x: 10, y: 100 } },
-      { id: 'barrier_2', type: 'fence', pos: { x: 1050, y: 350 }, size: { x: 10, y: 100 } },
-      { id: 'notice_1', type: 'poster', pos: { x: 450, y: 340 }, size: { x: 40, y: 60 } },
-      { id: 'notice_2', type: 'poster', pos: { x: 710, y: 340 }, size: { x: 40, y: 60 } },
-      { id: 'lamp_poll_1', type: 'lamp', pos: { x: 100, y: 430 }, size: { x: 10, y: 60 } },
-      { id: 'lamp_poll_2', type: 'lamp', pos: { x: 1100, y: 430 }, size: { x: 10, y: 60 } },
-    ],
-  },
-  {
-    id: 'results',
-    name: 'District Counting Centre',
-    description: 'The secure facility where the fate of the election is decided and results are tallied.',
-    bgColor: '#2E281A',
-    accentColor: '#fbbf24',
-    emoji: '🏛️',
-    mapPosition: { x: 700, y: 180 },
-    unlocked: false,
-    buildings: [
-      { rect: { x: 300, y: 60, w: 600, h: 300, d: 260 }, color: '#451A03', roofColor: '#1C1917', label: 'Main Counting Hall', emoji: '🏛️' },
-    ],
-    npcs: resultsNPCs,
-    objects: resultsObjects,
-    props: [
-      { id: 'res_road', type: 'sidewalk', pos: { x: 0, y: 420 }, size: { x: 1200, y: 120 } },
-      { id: 'security_fence', type: 'fence', pos: { x: 0, y: 380 }, size: { x: 1200, y: 5 } },
-      { id: 'lamp_res_1', type: 'lamp', pos: { x: 250, y: 400 }, size: { x: 10, y: 60 } },
-      { id: 'lamp_res_2', type: 'lamp', pos: { x: 950, y: 400 }, size: { x: 10, y: 60 } },
-      { id: 'tree_res_1', type: 'tree', pos: { x: 100, y: 200 }, size: { x: 50, y: 80 } },
-      { id: 'tree_res_2', type: 'tree', pos: { x: 1050, y: 200 }, size: { x: 50, y: 80 } },
-    ],
-  },
-];
+export const ZONES: Zone[] = [neighborhoodZone, registrationZone, campaignZone, pollingZone, resultsZone];
