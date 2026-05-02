@@ -93,32 +93,63 @@ function drawPlant(ctx: CanvasRenderingContext2D, x: number, y: number) {
   ctx.strokeStyle = C.outline; ctx.lineWidth = 1.5; ctx.stroke();
 }
 
-function drawCharacter(ctx: CanvasRenderingContext2D, x: number, y: number, color: string = '#E2A981', suit: string = '#4A5568', isNearest = false) {
+function drawCharacter(ctx: CanvasRenderingContext2D, x: number, y: number, color: string = '#E2A981', suit: string = '#4A5568', isNearest = false, dir = 'down', moving = false, t = 0) {
   const p = toIso(x, y, 0);
   
-  // Shadow
+  // Ambient idle or walk cycle
+  const speed = moving ? 0.015 : 0.003;
+  const amp = moving ? 2 : 0.5;
+  const bob = Math.sin(t * speed) * amp;
+  
+  // Shadow pulses slightly
+  const shadowScale = 1 + (bob * 0.1);
   ctx.fillStyle = 'rgba(0,0,0,0.15)';
-  ctx.beginPath(); ctx.ellipse(p.x, p.y, 8, 4, 0, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(p.x, p.y, 8 * shadowScale, 4 * shadowScale, 0, 0, Math.PI*2); ctx.fill();
 
   if (isNearest) {
-    ctx.strokeStyle = C.accent;
+    // Pulse highlight
+    const pulse = 1 + Math.sin(t * 0.005) * 0.2;
+    ctx.strokeStyle = `rgba(243, 183, 96, ${0.5 + pulse * 0.3})`;
     ctx.lineWidth = 2;
-    ctx.beginPath(); ctx.ellipse(p.x, p.y, 16, 8, 0, 0, Math.PI*2); ctx.stroke();
-    drawLabel(ctx, x, y, "[ E ] INTERACT", 60, C.accent);
+    ctx.beginPath(); ctx.ellipse(p.x, p.y, 16 * pulse, 8 * pulse, 0, 0, Math.PI*2); ctx.stroke();
+    drawLabel(ctx, x, y, "[ E ] INTERACT", 60 + bob, C.accent);
   }
 
-  // Legs
-  ctx.fillStyle = '#2D3748'; ctx.fillRect(p.x - 4, p.y - 12, 3, 12); ctx.fillRect(p.x + 1, p.y - 12, 3, 12);
+  // Legs animation
+  let lLegY = 0, rLegY = 0;
+  if (moving) {
+    lLegY = Math.sin(t * speed) * 3;
+    rLegY = -Math.sin(t * speed) * 3;
+  }
+  ctx.fillStyle = '#2D3748'; 
+  ctx.fillRect(p.x - 4, p.y - 12 + lLegY, 3, 12 - lLegY); 
+  ctx.fillRect(p.x + 1, p.y - 12 + rLegY, 3, 12 - rLegY);
   
   // Body
   ctx.fillStyle = suit;
-  ctx.beginPath(); ctx.roundRect(p.x - 6, p.y - 28, 12, 16, 3); ctx.fill();
+  ctx.beginPath(); ctx.roundRect(p.x - 6, p.y - 28 + bob, 12, 16, 3); ctx.fill();
   ctx.strokeStyle = C.outline; ctx.lineWidth = 1; ctx.stroke();
   
   // Head
   ctx.fillStyle = color;
-  ctx.beginPath(); ctx.arc(p.x, p.y - 34, 6, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(p.x, p.y - 34 + bob, 6, 0, Math.PI*2); ctx.fill();
   ctx.stroke();
+
+  // Face direction indicator (visor/eyes)
+  ctx.fillStyle = 'rgba(0,0,0,0.4)';
+  if (dir === 'down') ctx.fillRect(p.x - 4, p.y - 36 + bob, 4, 2);
+  else if (dir === 'right') ctx.fillRect(p.x + 1, p.y - 36 + bob, 4, 2);
+  else if (dir === 'left') ctx.fillRect(p.x - 6, p.y - 37 + bob, 2, 2);
+  // 'up' faces away
+}
+
+function drawKioskLight(ctx: CanvasRenderingContext2D, x: number, y: number, z: number, t: number) {
+  const p = toIso(x, y, z);
+  const glow = Math.abs(Math.sin(t * 0.003));
+  ctx.fillStyle = `rgba(100, 158, 148, ${0.4 + glow * 0.6})`;
+  ctx.beginPath(); ctx.arc(p.x, p.y, 3, 0, Math.PI*2); ctx.fill();
+  ctx.fillStyle = `rgba(100, 158, 148, ${0.1 + glow * 0.2})`;
+  ctx.beginPath(); ctx.arc(p.x, p.y, 8, 0, Math.PI*2); ctx.fill();
 }
 
 function drawLabel(ctx: CanvasRenderingContext2D, x: number, y: number, text: string, z: number = 80, textColor = C.labelText) {
@@ -157,6 +188,8 @@ export const GameCanvas: React.FC<Props> = ({ state, zone, onInteract, inputRef 
   
   // Local mutable state for smooth movement
   const pos = useRef({ x: 220, y: 160 }); // Start in civic plaza
+  const dir = useRef('down');
+  const moving = useRef(false);
   const nearestRef = useRef<{ id: string, type: 'npc'|'object' } | null>(null);
 
   const getNearest = useCallback((px: number, py: number) => {
@@ -200,10 +233,28 @@ export const GameCanvas: React.FC<Props> = ({ state, zone, onInteract, inputRef 
       if (state.phase === 'playing') {
         const s = 3.5;
         const k = inputRef.current;
-        if (k.has('ArrowLeft') || k.has('a') || k.has('A')) pos.current.x -= s;
-        if (k.has('ArrowRight') || k.has('d') || k.has('D')) pos.current.x += s;
-        if (k.has('ArrowUp') || k.has('w') || k.has('W')) pos.current.y -= s;
-        if (k.has('ArrowDown') || k.has('s') || k.has('S')) pos.current.y += s;
+        let dx = 0, dy = 0;
+        if (k.has('ArrowLeft') || k.has('a') || k.has('A')) dx -= s;
+        if (k.has('ArrowRight') || k.has('d') || k.has('D')) dx += s;
+        if (k.has('ArrowUp') || k.has('w') || k.has('W')) dy -= s;
+        if (k.has('ArrowDown') || k.has('s') || k.has('S')) dy += s;
+
+        if (dx !== 0 || dy !== 0) {
+          moving.current = true;
+          if (Math.abs(dx) > Math.abs(dy)) {
+            dir.current = dx > 0 ? 'right' : 'left';
+          } else {
+            dir.current = dy > 0 ? 'down' : 'up';
+          }
+          pos.current.x += dx;
+          pos.current.y += dy;
+        } else {
+          moving.current = false;
+        }
+
+        // Map Boundary Clamping
+        pos.current.x = Math.max(-80, Math.min(580, pos.current.x));
+        pos.current.y = Math.max(-130, Math.min(480, pos.current.y));
       }
 
       const nearest = getNearest(pos.current.x, pos.current.y);
@@ -250,6 +301,8 @@ export const GameCanvas: React.FC<Props> = ({ state, zone, onInteract, inputRef 
       drawBuildingWall(ctx, 600, -150, 10, 230, 100, true);
       drawBuildingWall(ctx, 350, 80, 100, 10, 100, false);
       drawLabel(ctx, 475, -50, "VOTING CENTER", 120);
+      drawKioskLight(ctx, 420, -50, 25, now);
+      drawKioskLight(ctx, 520, 10, 25, now + 1000);
 
       // --- BUILDING 4: POLLING STATIONS ---
       drawPoly(ctx, [toIso(350,120), toIso(550,120), toIso(550,250), toIso(350,250)], C.floor, C.outline);
@@ -277,11 +330,12 @@ export const GameCanvas: React.FC<Props> = ({ state, zone, onInteract, inputRef 
         if (ent.type === 'npc') {
           const n = ent.data;
           const isNear = nearest?.id === n.id;
-          drawCharacter(ctx, n.pos.x, n.pos.y, n.color, '#3A485A', isNear);
+          // NPCs get a slight random offset to their animation phase based on their X coordinate
+          drawCharacter(ctx, n.pos.x, n.pos.y, n.color, '#3A485A', isNear, n.dir, false, now + n.pos.x * 10);
         } else {
           // Player
           const pColor = state.player.avatar === 'hero_m' ? C.accent : '#FCD34D';
-          drawCharacter(ctx, pos.current.x, pos.current.y, pColor, '#223040', false);
+          drawCharacter(ctx, pos.current.x, pos.current.y, pColor, '#223040', false, dir.current, moving.current, now);
         }
       });
 
