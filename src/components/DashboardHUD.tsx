@@ -170,7 +170,7 @@ export const DashboardHUD: React.FC<Props> = ({ state, onZoneTravel, children })
             { icon: '🗺️', label: 'MAP VIEW' },
             { icon: '⚙️', label: 'SETTINGS' },
           ].map((btn, i) => (
-            <button key={i} style={{
+            <button key={i} aria-label={btn.label} style={{
               flex: 1,
               backgroundColor: '#2A3441',
               border: 'none',
@@ -183,6 +183,8 @@ export const DashboardHUD: React.FC<Props> = ({ state, onZoneTravel, children })
             }}
             onMouseOver={(e) => { e.currentTarget.style.backgroundColor = '#323E4D'; e.currentTarget.style.color = C.accent; }}
             onMouseOut={(e) => { e.currentTarget.style.backgroundColor = '#2A3441'; e.currentTarget.style.color = C.textDim; }}
+            onFocus={(e) => { e.currentTarget.style.backgroundColor = '#323E4D'; e.currentTarget.style.color = C.accent; }}
+            onBlur={(e) => { e.currentTarget.style.backgroundColor = '#2A3441'; e.currentTarget.style.color = C.textDim; }}
             onClick={() => {
               if (btn.label === 'MAP VIEW') {
                 const zones = ['neighborhood', 'polling', 'campaign', 'registration', 'results'];

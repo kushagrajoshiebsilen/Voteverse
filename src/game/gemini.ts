@@ -154,13 +154,21 @@ function getFallbackResponse(npcRole: string, topic?: string): string {
 // ──────────────────────────────────────────────
 // Main Gemini call function
 // ──────────────────────────────────────────────
+/**
+ * Main Gemini call function that interacts with the Google Generative AI API.
+ * 
+ * @param prompt - The user prompt or instruction for the AI.
+ * @param gameState - The current state of the game for context injection.
+ * @param apiKey - The Google Gemini API key.
+ * @returns A promise resolving to the text response and optional function calls.
+ */
 export async function callGemini(
   prompt: string,
   gameState: GameState,
   apiKey?: string
 ): Promise<{ text: string; functionCall?: { name: string; args: Record<string, unknown> } }> {
   if (!apiKey || apiKey === 'YOUR_GEMINI_API_KEY') {
-    // Simulate realistic AI thinking time
+    // Simulate realistic AI thinking time for fallback
     await new Promise((r) => setTimeout(r, 600 + Math.random() * 400));
     return { text: getFallbackResponse('default') };
   }
@@ -198,15 +206,22 @@ Respond as in-world characters using natural conversational dialogue. Keep respo
       return { text: part.text };
     }
     throw new Error('No valid response');
-  } catch {
+  } catch (err) {
+    console.error('Gemini API Error:', err);
     await new Promise((r) => setTimeout(r, 300));
     return { text: getFallbackResponse('default') };
   }
 }
 
-// ──────────────────────────────────────────────
-// Generate NPC dialogue (with context)
-// ──────────────────────────────────────────────
+/**
+ * Generates contextual NPC dialogue based on player state and NPC role.
+ * 
+ * @param npcRole - The role of the NPC (e.g., "ERO Officer").
+ * @param topic - The topic of conversation.
+ * @param playerHasItems - Array of items currently in player inventory.
+ * @param apiKey - The Google Gemini API key.
+ * @returns A promise resolving to the generated dialogue string.
+ */
 export async function generateNpcDialogue(
   npcRole: string,
   topic: string,
@@ -228,9 +243,14 @@ export async function generateNpcDialogue(
   }
 }
 
-// ──────────────────────────────────────────────
-// Evaluate player choice ethics
-// ──────────────────────────────────────────────
+/**
+ * Evaluates a player choice based on civic ethics and returns consequences.
+ * 
+ * @param choice - The text of the player's choice.
+ * @param context - The context in which the choice was made.
+ * @param apiKey - The Google Gemini API key.
+ * @returns A promise resolving to the consequence text and an ethics score.
+ */
 export async function evaluatePlayerChoice(
   choice: string,
   context: string,
