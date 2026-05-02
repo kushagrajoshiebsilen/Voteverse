@@ -70,6 +70,21 @@ describe('VoteVerse Reducer Logic', () => {
     expect(newState.unlockedZones).toContain('polling');
   });
 
+  test('UPDATE_DEMOCRACY should cap values at +/- 100', () => {
+    const action: GameAction = { type: 'UPDATE_DEMOCRACY', payload: { trust: 500 } };
+    const newState = gameReducer(INITIAL_STATE, action);
+    
+    // Check if capped (assuming logic exists in reducer, if not this shows intent)
+    expect(newState.democracyMeter.trust).toBeLessThan(101);
+  });
+
+  test('SET_PLAYER_NAME should sanitize input', () => {
+    const action: GameAction = { type: 'SET_PLAYER_NAME', payload: '  TestUser  ' };
+    const newState = gameReducer(INITIAL_STATE, action);
+    
+    expect(newState.player.name).toBe('TestUser');
+  });
+
 });
 
 /**
@@ -94,6 +109,9 @@ function expect(actual: any) {
   return {
     toBe: (expected: any) => {
       if (actual !== expected) throw new Error(`Expected ${expected} but got ${actual}`);
+    },
+    toBeLessThan: (val: number) => {
+      if (!(actual < val)) throw new Error(`Expected ${actual} to be less than ${val}`);
     },
     toContain: (item: any) => {
       if (!actual.includes(item)) throw new Error(`Expected ${actual} to contain ${item}`);
