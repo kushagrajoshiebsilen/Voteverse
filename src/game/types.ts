@@ -63,6 +63,7 @@ export interface GameEffect {
   removeItem?: string;
   updateMeter?: Partial<DemocracyMeter>;
   completeQuest?: string;
+  completeObjective?: { questId: string; objectiveId: string };
   startQuest?: string;
   unlockZone?: ZoneId;
   startMiniGame?: MiniGameId;
@@ -161,7 +162,8 @@ export interface Zone {
 
 export interface EnvProp {
   id: string;
-  type: 'tree' | 'bench' | 'lamp' | 'flower_pot' | 'fence' | 'trash_bin' | 'poster' | 'crossing' | 'sidewalk';
+  type: 'tree' | 'bench' | 'lamp' | 'flower_pot' | 'fence' | 'trash_bin' | 'poster'
+      | 'crossing' | 'sidewalk' | 'kiosk' | 'counter' | 'barrier';
   pos: Vec2;
   size: Vec2;
   style?: string;
@@ -173,6 +175,7 @@ export interface Building {
   roofColor: string;
   label: string;
   emoji: string;
+  style?: string;
   doorRect?: Rect;
 }
 

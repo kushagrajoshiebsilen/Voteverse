@@ -5,7 +5,7 @@ export const WORLD_W = 1200;
 export const WORLD_H = 800;
 export const PLAYER_SPEED = 3.2;
 export const PLAYER_SIZE = 36;
-export const INTERACT_RADIUS = 70;
+export const INTERACT_RADIUS = 200;
 export const NPC_WALK_SPEED = 0.8;
 
 export const ZONE_COLORS: Record<string, { bg: string; accent: string; sky: string }> = {

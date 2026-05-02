@@ -103,6 +103,20 @@ function App() {
         });
       }
 
+      if (effect.completeObjective) {
+        const { questId, objectiveId } = effect.completeObjective;
+        // Auto-activate quest if still inactive
+        dispatch({ type: 'START_QUEST', payload: questId });
+        dispatch({ type: 'COMPLETE_OBJECTIVE', payload: { questId, objId: objectiveId } });
+        addNotification({
+          type: 'reputation',
+          title: 'OBJECTIVE COMPLETE',
+          message: '+25 score. Keep going!',
+          emoji: '☑️',
+        });
+      }
+
+
       if (effect.startQuest) {
         dispatch({ type: 'START_QUEST', payload: effect.startQuest });
         const quest = state.quests.find((q) => q.id === effect.startQuest);
