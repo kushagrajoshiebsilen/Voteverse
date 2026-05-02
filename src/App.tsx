@@ -441,19 +441,12 @@ function App() {
 
   return (
     <div
-      className="relative w-full h-full bg-[#030508] overflow-hidden select-none scanlines"
       style={{
         position: 'relative', width: '100vw', height: '100vh',
-        overflow: 'hidden', background: '#030508',
+        overflow: 'hidden', background: '#698784',
         fontFamily: "'Inter', system-ui, sans-serif",
       }}
     >
-      {/* ── CINEMATIC OVERLAYS ────────────────────────── */}
-        <div className="vignette" />
-        <div className="hud-corner corner-tl" />
-        <div className="hud-corner corner-tr" />
-        <div className="hud-corner corner-bl" />
-        <div className="hud-corner corner-br" />
 
       {/* ── INTRO SCREEN ─────────────────────────────── */}
       {state.phase === 'intro' || state.phase === 'naming' ? (
@@ -511,87 +504,6 @@ function App() {
         <EndingScreen state={state} onReplay={handleReplay} />
       )}
 
-      {/* ── NOTIFICATIONS ────────────────────────────── */}
-      <GameNotification notifications={notifications} onDismiss={dismissNotification} />
-
-      {/* ── Mobile D-Pad ─────────────────────────────── */}
-      {(state.phase === 'playing' || state.phase === 'dialogue') && (
-        <MobileDPad
-          onDirectionChange={(dx, dy) => {
-            touchRef.current = { ...touchRef.current, dx, dy };
-          }}
-          onInteract={() => {
-            if (state.phase !== 'playing') return;
-            // Trigger E key
-            const event = new KeyboardEvent('keydown', { key: 'e' });
-            window.dispatchEvent(event);
-          }}
-        />
-      )}
-    </div>
-  );
-}
-
-// ────────────────────────────────────────────────
-// Mobile D-Pad Component
-// ────────────────────────────────────────────────
-function MobileDPad({
-  onDirectionChange,
-  onInteract,
-}: {
-  onDirectionChange: (dx: number, dy: number) => void;
-  onInteract: () => void;
-}) {
-  const [active, setActive] = useState<string | null>(null);
-
-  const buttons = [
-    { dir: 'up', emoji: '▲', dx: 0, dy: -1, className: 'col-start-2 row-start-1' },
-    { dir: 'left', emoji: '◀', dx: -1, dy: 0, className: 'col-start-1 row-start-2' },
-    { dir: 'right', emoji: '▶', dx: 1, dy: 0, className: 'col-start-3 row-start-2' },
-    { dir: 'down', emoji: '▼', dx: 0, dy: 1, className: 'col-start-2 row-start-3' },
-  ];
-
-  return (
-    <div className="absolute bottom-20 left-4 z-20 opacity-90 md:hidden">
-      <div className="grid grid-cols-3 gap-1" style={{ width: '128px' }}>
-        {buttons.map((btn) => (
-          <button
-            key={btn.dir}
-            className={`${btn.className} w-10 h-10 flex items-center justify-center text-xs select-none`}
-            style={{
-              borderRadius: '6px',
-              background: active === btn.dir ? 'rgba(0,229,255,0.15)' : 'rgba(8,10,17,0.85)',
-              border: active === btn.dir ? '1px solid var(--cyan)' : '1px solid rgba(255,255,255,0.08)',
-              boxShadow: active === btn.dir ? '0 0 12px rgba(0,229,255,0.3)' : '0 2px 8px rgba(0,0,0,0.5)',
-              color: active === btn.dir ? 'var(--cyan)' : 'var(--text-muted)',
-              backdropFilter: 'blur(10px)',
-              transition: 'all 0.1s ease',
-            }}
-            onTouchStart={() => { setActive(btn.dir); onDirectionChange(btn.dx, btn.dy); }}
-            onTouchEnd={() => { setActive(null); onDirectionChange(0, 0); }}
-          >
-            {btn.emoji}
-          </button>
-        ))}
-        <button
-          className="col-start-2 row-start-2 w-10 h-10 flex items-center justify-center text-xs font-black select-none"
-          style={{
-            borderRadius: '6px',
-            background: 'rgba(255,184,0,0.12)',
-            border: '1px solid var(--saffron)',
-            color: 'var(--saffron)',
-            fontFamily: 'Orbitron, sans-serif',
-            fontSize: '9px',
-            fontWeight: 700,
-            boxShadow: '0 0 10px rgba(255,184,0,0.25)',
-            backdropFilter: 'blur(10px)',
-            letterSpacing: '0.1em',
-          }}
-          onTouchStart={onInteract}
-        >
-          USE
-        </button>
-      </div>
     </div>
   );
 }
