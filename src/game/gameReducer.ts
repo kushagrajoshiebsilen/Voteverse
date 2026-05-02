@@ -178,6 +178,12 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
         return q;
       });
 
+      // Auto-start next quest
+      if (questCompleted) {
+        const nextInactive = updated.find(q => q.status === 'inactive');
+        if (nextInactive) nextInactive.status = 'active';
+      }
+
       return { 
         ...state, 
         quests: updated, 

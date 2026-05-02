@@ -317,12 +317,10 @@ function App() {
   // ── Zone travel (from map) ───────────────────────
   const handleZoneTravel = useCallback(
     (zoneId: string) => {
-      if (state.unlockedZones.includes(zoneId as ZoneId)) {
-        setPendingTransition(zoneId as ZoneId);
-        dispatch({ type: 'SET_PHASE', payload: 'transition' });
-      }
+      setPendingTransition(zoneId as any);
+      dispatch({ type: 'SET_PHASE', payload: 'transition' });
     },
-    [state.unlockedZones]
+    []
   );
 
   // ── Mini-game complete ───────────────────────────
