@@ -161,17 +161,32 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
     }
 
     case 'COMPLETE_OBJECTIVE': {
-      const updated = state.quests.map((q) =>
-        q.id === action.payload.questId
-          ? {
-              ...q,
-              objectives: q.objectives.map((o) =>
-                o.id === action.payload.objId ? { ...o, complete: true } : o
-              ),
-            }
-          : q
-      );
-      return { ...state, quests: updated, score: state.score + 25 };
+      let questCompleted = false;
+      const updated = state.quests.map((q) => {
+        if (q.id === action.payload.questId) {
+          const newObj = q.objectives.map((o) =>
+            o.id === action.payload.objId ? { ...o, complete: true } : o
+          );
+          const allDone = newObj.every(o => o.complete);
+          if (allDone && q.status !== 'complete') questCompleted = true;
+          return {
+            ...q,
+            objectives: newObj,
+            status: allDone ? 'complete' : q.status
+          } as typeof q;
+        }
+        return q;
+      });
+
+      return { 
+        ...state, 
+        quests: updated, 
+        score: state.score + 25 + (questCompleted ? 200 : 0),
+        reputation: state.reputation + (questCompleted ? 30 : 0),
+        completedQuests: questCompleted && !state.completedQuests.includes(action.payload.questId) 
+          ? [...state.completedQuests, action.payload.questId] 
+          : state.completedQuests
+      };
     }
 
     case 'START_QUEST': {

@@ -3,6 +3,7 @@ import type { GameState } from '../game/types';
 
 interface Props {
   state: GameState;
+  onZoneTravel: (zoneId: string) => void;
   children?: React.ReactNode;
 }
 
@@ -24,9 +25,15 @@ const BracketText = ({ children, color = C.textDim, style }: { children: React.R
   </span>
 );
 
-export const DashboardHUD: React.FC<Props> = ({ state, children }) => {
+export const DashboardHUD: React.FC<Props> = ({ state, onZoneTravel, children }) => {
   const quest = state.quests.find(q => q.status === 'active');
   const level = Math.max(1, Math.floor(state.reputation / 100) + 1);
+
+  const completedObj = quest?.objectives.filter(o => o.complete).length || 0;
+  const totalObj = quest?.objectives.length || 1;
+  const progressPct = quest ? (completedObj / totalObj) * 100 : 100;
+  
+  const currentTask = quest?.objectives.find(o => !o.complete)?.text || "WAITING FOR ORDERS";
 
   return (
     <div style={{
@@ -86,15 +93,15 @@ export const DashboardHUD: React.FC<Props> = ({ state, children }) => {
         }}>
           <BracketText color={C.accent} style={{ display: 'block', marginBottom: 16 }}>MISSIONS - ACTIVE</BracketText>
           
-          <BracketText color={C.textDim} style={{ display: 'block', marginBottom: 4 }}>MISSION: {quest?.title.toUpperCase() || 'VOTER REGISTRATION DRIVE'}</BracketText>
+          <BracketText color={C.textDim} style={{ display: 'block', marginBottom: 4 }}>MISSION: {quest?.title.toUpperCase() || 'STANDBY'}</BracketText>
           
           <div style={{ color: C.textDim, marginBottom: 8, display: 'flex', justifyContent: 'space-between' }}>
-            <span>GOAL: REGISTER 500 NEW VOTERS</span>
-            <span>(215/500)</span>
+            <span>GOAL: {quest?.description.toUpperCase() || 'AWAITING MISSION'}</span>
+            <span>({completedObj}/{totalObj})</span>
           </div>
 
           <div style={{ height: 6, backgroundColor: C.panelBorder, borderRadius: 3, marginBottom: 20, overflow: 'hidden' }}>
-            <div style={{ width: '43%', height: '100%', backgroundColor: C.accent, borderRadius: 3 }} />
+            <div style={{ width: `${progressPct}%`, height: '100%', backgroundColor: C.accent, borderRadius: 3, transition: 'width 0.3s ease' }} />
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
@@ -134,7 +141,7 @@ export const DashboardHUD: React.FC<Props> = ({ state, children }) => {
           padding: 16,
         }}>
           <BracketText color={C.accent} style={{ display: 'block', marginBottom: 8 }}>CURRENT TASK:</BracketText>
-          <span style={{ color: C.textDim }}>INSPECT POLLING STATION #3</span>
+          <span style={{ color: C.textDim }}>{currentTask.toUpperCase()}</span>
         </div>
       </div>
 
@@ -176,6 +183,14 @@ export const DashboardHUD: React.FC<Props> = ({ state, children }) => {
             }}
             onMouseOver={(e) => { e.currentTarget.style.backgroundColor = '#323E4D'; e.currentTarget.style.color = C.accent; }}
             onMouseOut={(e) => { e.currentTarget.style.backgroundColor = '#2A3441'; e.currentTarget.style.color = C.textDim; }}
+            onClick={() => {
+              if (btn.label === 'MAP VIEW') {
+                const zones = ['neighborhood', 'polling', 'campaign', 'registration', 'results'];
+                const currentIndex = zones.indexOf(state.currentZone);
+                const nextZone = zones[(currentIndex + 1) % zones.length];
+                onZoneTravel(nextZone);
+              }
+            }}
             >
               <span style={{ fontSize: 20, filter: 'sepia(1) hue-rotate(-30deg) saturate(3) brightness(0.9) opacity(0.8)' }}>{btn.icon}</span>
               <span style={{ fontSize: 11, fontWeight: 600 }}>{btn.label}</span>

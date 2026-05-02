@@ -192,6 +192,12 @@ export const GameCanvas: React.FC<Props> = ({ state, zone, onInteract, inputRef 
   const moving = useRef(false);
   const nearestRef = useRef<{ id: string, type: 'npc'|'object' } | null>(null);
 
+  const C_ZONE = {
+    ...C,
+    ground: zone.bgColor || C.ground,
+    accent: zone.accentColor || C.accent,
+  };
+
   const getNearest = useCallback((px: number, py: number) => {
     let nearest: any = null;
     for (const n of zone.npcs) {
@@ -261,7 +267,7 @@ export const GameCanvas: React.FC<Props> = ({ state, zone, onInteract, inputRef 
       nearestRef.current = nearest;
 
       // Clear
-      ctx.fillStyle = C.ground;
+      ctx.fillStyle = C_ZONE.ground;
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
       // Paths
@@ -334,7 +340,7 @@ export const GameCanvas: React.FC<Props> = ({ state, zone, onInteract, inputRef 
           drawCharacter(ctx, n.pos.x, n.pos.y, n.color, '#3A485A', isNear, n.dir, false, now + n.pos.x * 10);
         } else {
           // Player
-          const pColor = state.player.avatar === 'hero_m' ? C.accent : '#FCD34D';
+          const pColor = state.player.avatar === 'hero_m' ? C_ZONE.accent : '#FCD34D';
           drawCharacter(ctx, pos.current.x, pos.current.y, pColor, '#223040', false, dir.current, moving.current, now);
         }
       });
@@ -342,7 +348,7 @@ export const GameCanvas: React.FC<Props> = ({ state, zone, onInteract, inputRef 
       // Objects highlight
       zone.objects.forEach(o => {
         if (nearest?.id === o.id) {
-          drawLabel(ctx, o.pos.x, o.pos.y, `[ E ] ${o.label}`, 50, C.accent);
+          drawLabel(ctx, o.pos.x, o.pos.y, `[ E ] ${o.label}`, 50, C_ZONE.accent);
         }
       });
 
